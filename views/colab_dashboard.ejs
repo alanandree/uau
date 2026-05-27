@@ -1,0 +1,469 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Painel Colaborador - Fixoo</title>
+  <link rel="stylesheet" href="/css/colaborador.css">
+  <style>
+    .tabs { display:flex; gap:0; margin-bottom:24px; border-bottom:2px solid #e2e8f0; }
+    .tab-btn { padding:12px 24px; border:none; background:transparent; font-weight:600; font-size:14px; cursor:pointer; color:#6b7280; border-bottom:2px solid transparent; margin-bottom:-2px; }
+    .tab-btn:hover { color:#3b82f6; }
+    .tab-btn.active { color:#3b82f6; border-bottom-color:#3b82f6; }
+    .tab-content { display:none; }
+    .tab-content.active { display:block; }
+    .pedido-card { background:#f9fafb; border-radius:12px; padding:16px; margin-bottom:12px; border:1px solid #e5e7eb; }
+    .pedido-card .topo-card { display:flex; justify-content:space-between; align-items:flex-start; flex-wrap:wrap; gap:8px; }
+    .pedido-card .cliente-nome { font-weight:700; font-size:16px; color:#111827; }
+    .pedido-card .cliente-phone { font-size:13px; color:#6b7280; }
+    .pedido-card .servicos-info { font-size:13px; color:#4b5563; margin:6px 0; }
+    .pedido-card .total-valor { font-weight:700; color:#3b82f6; font-size:16px; }
+    .codigo-badge { display:inline-block; background:#fef3c7; color:#d97706; padding:4px 12px; border-radius:6px; font-weight:700; font-size:18px; letter-spacing:2px; font-family:monospace; margin-top:6px; }
+    .status-badge { display:inline-block; padding:3px 10px; border-radius:10px; font-size:12px; font-weight:600; }
+    .status-pendente { background:#fef3c7; color:#d97706; }
+    .status-confirmado { background:#dcfce7; color:#16a34a; }
+    .status-cancelado { background:#fee2e2; color:#dc2626; }
+    .acoes-card { margin-top:10px; display:flex; gap:8px; flex-wrap:wrap; }
+    .acoes-card button, .acoes-card a { padding:7px 16px; border-radius:8px; font-size:12px; font-weight:600; border:none; cursor:pointer; text-decoration:none; display:inline-block; }
+    .btn-confirmar { background:#10b981; color:#fff; }
+    .btn-chat { background:#3b82f6; color:#fff; }
+    .btn-avaliar { background:#8b5cf6; color:#fff; }
+
+    .chat-layout { display:flex; gap:16px; min-height:400px; }
+    .chat-sidebar { width:260px; flex-shrink:0; border-right:1px solid #e5e7eb; padding-right:12px; }
+    .chat-main { flex:1; display:flex; flex-direction:column; }
+    .chat-msgs { flex:1; min-height:300px; overflow-y:auto; padding:12px; background:#f9fafb; border-radius:8px; display:flex; flex-direction:column; gap:8px; }
+    .msg { padding:8px 14px; border-radius:12px; max-width:80%; font-size:14px; line-height:1.4; }
+    .msg.colab { background:#3b82f6; color:#fff; align-self:flex-end; }
+    .msg.cliente { background:#e5e7eb; color:#111827; align-self:flex-start; }
+    .msg .meta { font-size:10px; opacity:0.7; margin-top:4px; display:block; }
+    .chat-input-row { display:flex; gap:8px; margin-top:8px; }
+    .chat-input-row input { flex:1; padding:10px; border:1px solid #d1d5db; border-radius:8px; font-size:14px; }
+    .chat-input-row button { padding:10px 18px; background:#3b82f6; color:#fff; border:none; border-radius:8px; font-weight:600; cursor:pointer; }
+    .conversa-item { padding:10px; border-radius:8px; cursor:pointer; margin-bottom:4px; font-size:13px; }
+    .conversa-item:hover { background:#f3f4f6; }
+    .conversa-item.active { background:#eff6ff; }
+    .conversa-item .nome { font-weight:600; }
+    .empty-chat { text-align:center;color:#9ca3af;margin-top:80px; }
+    .empty-pedidos { text-align:center;padding:40px;color:#9ca3af; }
+
+    .servicos-section { margin-top:24px; }
+    .servicos-section h2 { font-size:18px; color:#1e293b; margin-bottom:4px; }
+    .servicos-section p { font-size:14px; color:#64748b; margin-bottom:16px; }
+    .servico-input-row { display:flex; gap:10px; margin-bottom:12px; flex-wrap:wrap; }
+    .servico-input-row input { padding:10px; border:1px solid #d1d5db; border-radius:8px; font-size:14px; }
+    .servico-input-row input[name="nome"] { flex:2; min-width:150px; }
+    .servico-input-row input[name="preco"] { flex:1; min-width:100px; }
+    .servico-input-row button { padding:10px 20px; background:#3b82f6; color:#fff; border:none; border-radius:8px; font-weight:600; cursor:pointer; }
+    table.servicos-table { width:100%; border-collapse:collapse; font-size:14px; }
+    table.servicos-table th { text-align:left; padding:8px; background:#f3f4f6; font-weight:600; color:#374151; }
+    table.servicos-table td { padding:8px; border-bottom:1px solid #e5e7eb; }
+
+    .estrelas { color:#f59e0b; font-size:14px; }
+    .avatar-preview { width:100px; height:100px; border-radius:50%; object-fit:cover; border:4px solid #e2e8f0; margin-bottom:10px; }
+    .dados-grid { display:grid; grid-template-columns:1fr 1fr; gap:16px; }
+    .dados-grid .form-group { margin-bottom:0; }
+    @media(max-width:600px){ .dados-grid { grid-template-columns:1fr; } }
+
+    @media(max-width:700px){
+      .chat-layout { flex-direction:column; }
+      .chat-sidebar { width:100%; border-right:none; padding-right:0; max-height:200px; overflow-y:auto; }
+    }
+  </style>
+</head>
+<body>
+  <header class="topo">
+    <a href="/colaborador/dashboard" class="brand-link">FIXOO</a>
+    <nav>
+      <a href="/">Site</a>
+      <a href="/colaborador/logout">Sair</a>
+    </nav>
+  </header>
+
+  <main class="container">
+    <div class="form-card">
+      <div class="form-header">
+        <h1>Painel do Colaborador</h1>
+        <p>Gerencie seu perfil, veja solicitações e converse com clientes</p>
+      </div>
+
+      <div style="text-align:center;padding:10px;border-radius:10px;margin-bottom:20px;font-weight:600;font-size:14px;background:<%= colab.approved ? '#dcfce7' : '#fef3c7' %>;color:<%= colab.approved ? '#16a34a' : '#d97706' %>">
+        <%= colab.approved ? 'Aprovado! Seu perfil aparece na busca do Fixoo.' : 'Cadastro pendente de aprovação.' %>
+      </div>
+
+      <div class="tabs">
+        <button class="tab-btn active" data-tab="perfil">Meu Perfil</button>
+        <button class="tab-btn" data-tab="solicitacoes">Solicitações</button>
+        <button class="tab-btn" data-tab="chat">Chat</button>
+      </div>
+
+      <div class="tab-content active" id="tab-perfil">
+        <% if (success) { %><div class="alert alert-success"><%= success %></div><% } %>
+        <% if (error) { %><div class="alert alert-error"><%= error %></div><% } %>
+
+        <form action="/colaborador/dashboard" method="POST" enctype="multipart/form-data">
+          <fieldset>
+            <legend>Dados Pessoais</legend>
+            <div style="text-align:center;margin-bottom:16px">
+              <img src="<%= colab.profile_picture || '/img/default-avatar.svg' %>" alt="" class="avatar-preview" id="preview">
+              <div class="file-upload" style="justify-content:center">
+                <input type="file" name="profile_picture" id="profile_picture" accept="image/*">
+                <label for="profile_picture" class="file-label">Alterar Foto</label>
+              </div>
+            </div>
+            <div style="text-align:center;margin-bottom:16px">
+              <div class="file-upload" style="justify-content:center">
+                <input type="file" name="banner" id="banner" accept="image/*">
+                <label for="banner" class="file-label"><%= colab.banner ? 'Alterar Banner' : 'Adicionar Banner' %></label>
+              </div>
+              <% if (colab.banner) { %>
+                <img src="<%= colab.banner %>" style="width:100%;max-height:120px;object-fit:cover;border-radius:8px;margin-top:8px">
+              <% } %>
+            </div>
+            <div class="dados-grid">
+              <div class="form-group">
+                <label for="name">Nome completo</label>
+                <input type="text" name="name" id="name" value="<%= colab.name %>" required>
+              </div>
+              <div class="form-group">
+                <label>CPF</label>
+                <input type="text" value="<%= colab.cpf %>" disabled>
+              </div>
+              <div class="form-group">
+                <label>Email</label>
+                <input type="email" value="<%= colab.email %>" disabled>
+              </div>
+              <div class="form-group">
+                <label for="phone">Telefone</label>
+                <input type="text" name="phone" id="phone" value="<%= colab.phone || '' %>">
+              </div>
+            </div>
+          </fieldset>
+
+          <fieldset>
+            <legend>Dados do Serviço</legend>
+            <div class="dados-grid">
+              <div class="form-group">
+                <label for="category">Categoria</label>
+                <select name="category" id="category" required>
+                  <option value="Moda e Beleza" <%= colab.category === 'Moda e Beleza' ? 'selected' : '' %>>Moda e Beleza</option>
+                  <option value="Assistência Técnica" <%= colab.category === 'Assistência Técnica' ? 'selected' : '' %>>Assistência Técnica</option>
+                  <option value="Saúde" <%= colab.category === 'Saúde' ? 'selected' : '' %>>Saúde</option>
+                  <option value="Reformas e Serviços" <%= colab.category === 'Reformas e Serviços' ? 'selected' : '' %>>Reformas e Serviços</option>
+                  <option value="Serviços Domésticos" <%= colab.category === 'Serviços Domésticos' ? 'selected' : '' %>>Serviços Domésticos</option>
+                  <option value="Outros" <%= colab.category === 'Outros' ? 'selected' : '' %>>Outros</option>
+                </select>
+              </div>
+              <div class="form-group">
+                <label for="subcategory">Especialidade</label>
+                <input type="text" name="subcategory" id="subcategory" value="<%= colab.subcategory || '' %>" placeholder="Ex: Corte de cabelo, Encanamento...">
+              </div>
+            </div>
+            <div class="form-group">
+              <label for="description">Descrição</label>
+              <textarea name="description" id="description" rows="3"><%= colab.description || '' %></textarea>
+            </div>
+            <div class="form-group">
+              <label for="working_hours">Horários</label>
+              <input type="text" name="working_hours" id="working_hours" value="<%= colab.working_hours || '' %>" placeholder="Ex: Seg a Sex 9h-18h, Sáb 9h-13h">
+            </div>
+          </fieldset>
+
+          <fieldset>
+            <legend>Localização e Contato</legend>
+            <div class="dados-grid">
+              <div class="form-group">
+                <label for="city">Cidade</label>
+                <input type="text" name="city" id="city" value="<%= colab.city || '' %>">
+              </div>
+              <div class="form-group">
+                <label for="state">Estado</label>
+                <select name="state" id="state">
+                  <option value="">Selecione...</option>
+                  <% ['AC','AL','AP','AM','BA','CE','DF','ES','GO','MA','MT','MS','MG','PA','PB','PR','PE','PI','RJ','RN','RS','RO','RR','SC','SP','SE','TO'].forEach(function(s) { %>
+                    <option value="<%= s %>" <%= colab.state === s ? 'selected' : '' %>><%= s %></option>
+                  <% }); %>
+                </select>
+              </div>
+            </div>
+            <div class="form-group">
+              <label for="address">Endereço</label>
+              <input type="text" name="address" id="address" value="<%= colab.address || '' %>">
+            </div>
+            <div class="dados-grid">
+              <div class="form-group">
+                <label for="whatsapp">WhatsApp</label>
+                <input type="text" name="whatsapp" id="whatsapp" value="<%= colab.whatsapp || '' %>">
+              </div>
+              <div class="form-group">
+                <label for="instagram">Instagram</label>
+                <input type="text" name="instagram" id="instagram" value="<%= colab.instagram || '' %>">
+              </div>
+            </div>
+          </fieldset>
+
+          <button type="submit" class="btn-submit">Salvar Alterações</button>
+        </form>
+
+        <div class="servicos-section">
+          <h2>Meus Serviços</h2>
+          <p>Adicione os serviços que você oferece com os preços.</p>
+          <div class="servico-input-row">
+            <input type="text" name="nome" id="servico-nome" placeholder="Nome do serviço">
+            <input type="number" name="preco" id="servico-preco" placeholder="Preço (R$)" step="0.01" min="0">
+            <button onclick="addServico()">Adicionar</button>
+          </div>
+          <table class="servicos-table">
+            <thead>
+              <tr><th>Serviço</th><th>Preço</th><th style="width:40px"></th></tr>
+            </thead>
+            <tbody id="servicos-tbody">
+              <% if (servicos.length > 0) { %>
+                <% servicos.forEach(function(s) { %>
+                  <tr>
+                    <td><%= s.nome %></td>
+                    <td>R$ <%= s.preco.toFixed(2).replace('.',',') %></td>
+                    <td><button onclick="removerServico(<%= s.id %>)" style="background:none;border:none;color:#ef4444;cursor:pointer">✕</button></td>
+                  </tr>
+                <% }); %>
+              <% } else { %>
+                <tr><td colspan="3" style="text-align:center;padding:20px;color:#9ca3af">Nenhum serviço cadastrado.</td></tr>
+              <% } %>
+            </tbody>
+          </table>
+          <span id="servico-msg" style="font-size:13px;color:#ef4444;margin-top:8px;display:block"></span>
+        </div>
+      </div>
+
+      <div class="tab-content" id="tab-solicitacoes">
+        <div id="pedidos-container"><p style="text-align:center;color:#9ca3af">Carregando...</p></div>
+        <div id="modal-avaliar" style="display:none;position:fixed;inset:0;z-index:999;background:rgba(0,0,0,0.5);align-items:center;justify-content:center">
+          <div style="background:#fff;border-radius:16px;padding:32px;max-width:320px;width:90%;text-align:center">
+            <p style="font-size:16px;font-weight:600;margin-bottom:16px">Avaliar Cliente</p>
+            <div style="display:flex;gap:8px;justify-content:center;font-size:32px">
+              <span onclick="enviarNota(1)" style="cursor:pointer;color:#d1d5db">⭐</span>
+              <span onclick="enviarNota(2)" style="cursor:pointer;color:#d1d5db">⭐</span>
+              <span onclick="enviarNota(3)" style="cursor:pointer;color:#d1d5db">⭐</span>
+              <span onclick="enviarNota(4)" style="cursor:pointer;color:#d1d5db">⭐</span>
+              <span onclick="enviarNota(5)" style="cursor:pointer;color:#d1d5db">⭐</span>
+            </div>
+            <p style="font-size:13px;color:#6b7280;margin-top:16px">Clique na estrela para avaliar</p>
+            <button onclick="document.getElementById('modal-avaliar').style.display='none'" style="margin-top:12px;padding:8px 20px;background:#e5e7eb;border:none;border-radius:8px;cursor:pointer;font-size:13px">Cancelar</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="tab-content" id="tab-chat">
+        <div class="chat-layout">
+          <div class="chat-sidebar">
+            <p style="font-weight:600;margin-bottom:8px">Conversas</p>
+            <div id="conversas-lista"><p style="color:#9ca3af;font-size:13px">Carregando...</p></div>
+          </div>
+          <div class="chat-main">
+            <p id="chat-titulo" style="font-weight:600;margin-bottom:8px;padding-bottom:8px;border-bottom:1px solid #e5e7eb"></p>
+            <div class="chat-msgs" id="chat-msgs">
+              <div class="empty-chat">Selecione uma conversa.</div>
+            </div>
+            <div class="chat-input-row" id="chat-input-row" style="display:none">
+              <input type="text" id="chat-input" placeholder="Digite sua mensagem..." onkeypress="if(event.key==='Enter')sendMsg()">
+              <button onclick="sendMsg()">Enviar</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <script>
+    let pedidos = [];
+    let chatPedidoId = null;
+    let chatTimer = null;
+
+    document.querySelectorAll('.tab-btn').forEach(function(btn) {
+      btn.addEventListener('click', function() {
+        document.querySelectorAll('.tab-btn').forEach(function(b) { b.classList.remove('active'); });
+        document.querySelectorAll('.tab-content').forEach(function(c) { c.classList.remove('active'); });
+        this.classList.add('active');
+        var tab = this.getAttribute('data-tab');
+        document.getElementById('tab-' + tab).classList.add('active');
+        if (tab === 'solicitacoes') loadPedidos();
+        if (tab === 'chat') loadConversas();
+      });
+    });
+
+    function loadPedidos() {
+      var el = document.getElementById('pedidos-container');
+      el.innerHTML = '<p style="text-align:center;color:#9ca3af">Carregando...</p>';
+      fetch('/api/pedidos/colaborador', { credentials: 'same-origin' }).then(function(r) {
+        if (!r.ok) throw new Error('Status ' + r.status);
+        return r.json();
+      }).then(function(data) {
+        pedidos = data;
+        if (!data.length) { el.innerHTML = '<p style="text-align:center;color:#9ca3af;padding:40px">Nenhuma solicitação ainda.</p>'; return; }
+        el.innerHTML = data.map(function(p) {
+          var snames = Array.isArray(p.servicos) ? p.servicos.map(function(s) { return s.nome || s; }).join(', ') : '';
+          var stars = 'Sem avaliação';
+          return '<div class="pedido-card" data-pedido-id="' + p.id + '" data-user-id="' + p.user_id + '">' +
+            '<div class="topo-card">' +
+              '<div>' +
+                '<div class="cliente-nome">' + (p.cliente_nome || 'Cliente') + '</div>' +
+                '<div class="cliente-phone">📞 ' + (p.cliente_phone || '') + ' | ' + stars + '</div>' +
+                '<div class="servicos-info">Serviço(s): ' + snames + '</div>' +
+                '<div class="total-valor">R$ ' + (p.total ? Number(p.total).toFixed(2).replace('.', ',') : '0,00') + '</div>' +
+                (p.codigo_confirmacao ? '<div class="codigo-badge">' + p.codigo_confirmacao + '</div>' : '') +
+              '</div>' +
+              '<span class="status-badge status-' + (p.status || 'pendente') + '">' + (p.status || 'pendente') + '</span>' +
+            '</div>' +
+            '<div class="acoes-card">' +
+              (p.status === 'pendente' ? '<button class="btn-confirmar">Confirmar</button>' : '') +
+              '<button class="btn-chat">Conversar</button>' +
+              (p.status !== 'cancelado' ? '<button class="btn-avaliar">Avaliar Cliente</button>' : '') +
+            '</div>' +
+          '</div>';
+        }).join('');
+      }).catch(function(e) {
+        el.innerHTML = '<p style="text-align:center;color:#ef4444">Erro: ' + (e.message || 'desconhecido') + '</p>';
+      });
+    }
+
+    document.getElementById('pedidos-container').addEventListener('click', function(e) {
+      var card = e.target.closest('.pedido-card');
+      if (!card) return;
+      var pedidoId = parseInt(card.getAttribute('data-pedido-id'));
+      var userId = parseInt(card.getAttribute('data-user-id'));
+      if (e.target.classList.contains('btn-confirmar')) {
+        fetch('/api/pedido/' + pedidoId + '/status', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          credentials: 'same-origin',
+          body: JSON.stringify({ status: 'confirmado' })
+        }).then(function(r) { return r.json(); }).then(function(d) { if (d.success) loadPedidos(); });
+      } else if (e.target.classList.contains('btn-chat')) {
+        chatPedidoId = pedidoId;
+        document.querySelector('.tab-btn[data-tab="chat"]').click();
+        setTimeout(function() { loadConversas(); }, 100);
+      } else if (e.target.classList.contains('btn-avaliar')) {
+        var div = document.getElementById('modal-avaliar');
+        div.style.display = 'flex';
+        div.setAttribute('data-pedido', pedidoId);
+        div.setAttribute('data-cliente', userId);
+      }
+    });
+
+    function enviarNota(nota) {
+      var div = document.getElementById('modal-avaliar');
+      var pedidoId = parseInt(div.getAttribute('data-pedido'));
+      var userId = parseInt(div.getAttribute('data-cliente'));
+      div.style.display = 'none';
+      fetch('/api/avaliar/cliente', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        credentials: 'same-origin',
+        body: JSON.stringify({ pedido_id: pedidoId, cliente_id: userId, nota: nota })
+      }).then(function(r) {
+        if (!r.ok) throw new Error('Erro ' + r.status);
+        return r.json();
+      }).then(function(d) {
+        if (d.success) { alert('Cliente avaliado!'); loadPedidos(); }
+      }).catch(function(err) {
+        alert('Erro ao avaliar: ' + err.message);
+      });
+    }
+
+    function loadConversas() {
+      fetch('/api/pedidos/colaborador', { credentials: 'same-origin' }).then(function(r) { return r.json(); }).then(function(data) {
+        var lista = document.getElementById('conversas-lista');
+        if (!data.length) { lista.innerHTML = '<p style="color:#9ca3af;font-size:13px">Nenhum pedido.</p>'; return; }
+        lista.innerHTML = data.map(function(p) {
+          var snames = Array.isArray(p.servicos) ? p.servicos.map(function(s) { return s.nome || s; }).join(', ') : '';
+          return '<div class="conversa-item' + (chatPedidoId === p.id ? ' active' : '') + '" data-pedido="' + p.id + '" onclick="selectChat(' + p.id + ')">' +
+            '<div class="nome">' + (p.cliente_nome || 'Cliente') + '</div>' +
+            '<div style="font-size:12px;color:#6b7280">#' + p.id + ' - ' + snames.substring(0, 25) + '</div>' +
+          '</div>';
+        }).join('');
+        if (chatPedidoId) {
+          document.getElementById('chat-titulo').textContent = 'Conversa - Pedido #' + chatPedidoId;
+          loadMessages(chatPedidoId);
+          document.getElementById('chat-input-row').style.display = 'flex';
+        }
+      });
+    }
+
+    function selectChat(pedidoId) {
+      chatPedidoId = pedidoId;
+      document.querySelectorAll('.conversa-item').forEach(function(i) { i.classList.remove('active'); });
+      document.querySelector('.conversa-item[data-pedido="' + pedidoId + '"]').classList.add('active');
+      document.getElementById('chat-titulo').textContent = 'Conversa - Pedido #' + pedidoId;
+      loadMessages(pedidoId);
+      document.getElementById('chat-input-row').style.display = 'flex';
+    }
+
+    function loadMessages(pedidoId) {
+      var area = document.getElementById('chat-msgs');
+      if (chatTimer) clearInterval(chatTimer);
+      function fetchMsgs() {
+        fetch('/api/chat/' + pedidoId, { credentials: 'same-origin' }).then(function(r) { return r.json(); }).then(function(msgs) {
+          if (!msgs.length) {
+            area.innerHTML = '<div class="empty-chat">Nenhuma mensagem ainda. Envie a primeira!</div>';
+            return;
+          }
+          area.innerHTML = msgs.map(function(m) {
+            var tipo = m.tipo_remetente === 'colaborador' ? 'colab' : 'cliente';
+            return '<div class="msg ' + tipo + '">' +
+              m.mensagem +
+              '<span class="meta">' + (m.nome_remetente || '') + ' - ' + new Date(m.data).toLocaleString() + '</span>' +
+            '</div>';
+          }).join('');
+          area.scrollTop = area.scrollHeight;
+        });
+      }
+      fetchMsgs();
+      chatTimer = setInterval(fetchMsgs, 3000);
+    }
+
+    function sendMsg() {
+      var input = document.getElementById('chat-input');
+      var msg = input.value.trim();
+      if (!msg || !chatPedidoId) return;
+      input.value = '';
+      fetch('/api/chat/' + chatPedidoId, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        credentials: 'same-origin',
+        body: JSON.stringify({ mensagem: msg, tipo: 'colaborador' })
+      }).then(function(r) {
+        if (!r.ok) throw new Error('Erro ' + r.status);
+        return r.json();
+      }).then(function(d) {
+        if (d.success) loadMessages(chatPedidoId);
+      }).catch(function(e) {
+        alert('Erro ao enviar mensagem: ' + e.message);
+        input.value = msg;
+      });
+    }
+
+    function addServico() {
+      var nome = document.getElementById('servico-nome').value.trim();
+      var preco = parseFloat(document.getElementById('servico-preco').value);
+      var msg = document.getElementById('servico-msg');
+      if (!nome) { msg.textContent = 'Digite o nome do serviço.'; return; }
+      if (!preco || preco <= 0) { msg.textContent = 'Digite um preço válido.'; return; }
+      msg.textContent = '';
+      fetch('/colaborador/servicos', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ nome: nome, preco: preco })
+      }).then(function(r) { return r.json(); }).then(function(data) {
+        if (data.success) { location.reload(); }
+        else { msg.textContent = data.error || 'Erro.'; }
+      }).catch(function() { msg.textContent = 'Erro ao adicionar.'; });
+    }
+
+    function removerServico(id) {
+      if (!confirm('Remover este serviço?')) return;
+      fetch('/colaborador/servicos/' + id, { method: 'DELETE' })
+        .then(function(r) { return r.json(); }).then(function(d) { if (d.success) location.reload(); });
+    }
+  </script>
+</body>
+</html>

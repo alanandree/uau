@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Cadastro</title>
+  <link rel="stylesheet" href="/css/auth.css">
+</head>
+<body>
+  <div class="split-container">
+    <div class="left-side">
+      <div class="form-wrapper">
+        <h1>Criar Conta</h1>
+
+        <% if (error) { %>
+          <div class="alert alert-error"><%= error %></div>
+        <% } %>
+
+        <form action="/register" method="POST">
+          <div class="form-group">
+            <label for="name">Nome</label>
+            <input type="text" name="name" id="name" value="<%= typeof name !== 'undefined' ? name : '' %>" required>
+          </div>
+          <div class="form-group">
+            <label for="email">Email</label>
+            <input type="email" name="email" id="email" value="<%= typeof email !== 'undefined' ? email : '' %>" required>
+          </div>
+          <div class="form-group">
+            <label for="password">Senha</label>
+            <input type="password" name="password" id="password" minlength="6" required>
+          </div>
+          <div class="form-group">
+            <label for="confirmPassword">Confirmar Senha</label>
+            <input type="password" name="confirmPassword" id="confirmPassword" minlength="6" required>
+          </div>
+          <button type="submit" class="btn btn-primary">Cadastrar</button>
+        </form>
+
+        <p class="link">Já tem conta? <a href="/login">Entrar</a></p>
+      </div>
+    </div>
+    <div class="right-side">
+      <a href="/" style="text-decoration:none">
+        <div class="brand-name">
+          <span>F</span><span>I</span><span>X</span><span class="wave">O</span><span class="wave">O</span>
+        </div>
+      </a>
+    </div>
+  </div>
+</body>
+</html>

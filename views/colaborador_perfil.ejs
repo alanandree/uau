@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title><%= colab.name %> - Fixoo</title>
+  <link rel="stylesheet" href="/css/barbeiro.css">
+  <style>
+    .banner { width:100%; height:200px; object-fit:cover; border-radius:12px; margin-bottom:16px; background:#e2e8f0; display:block; }
+    .perfil-header { display:flex; align-items:center; gap:20px; margin-bottom:24px; flex-wrap:wrap; }
+    .perfil-avatar { width:100px;height:100px;border-radius:50%;object-fit:cover;border:4px solid #e2e8f0; }
+    .perfil-info { flex:1; }
+    .perfil-info h1 { margin:0 0 4px; font-size:24px;color:#333; }
+    .perfil-info .sub { color:#6b7280; font-size:14px; }
+    .stars { margin-top:4px; }
+    .star-filled { color:#f59e0b; font-size:18px; }
+    .star-empty { color:#d1d5db; font-size:18px; }
+    .perfil-contato { display:flex; gap:12px; margin-top:10px; flex-wrap:wrap; }
+    .perfil-contato a { padding:8px 18px; border-radius:20px; font-size:13px; font-weight:600; text-decoration:none; display:inline-block; }
+    .btn-wpp { background:#25d366; color:#fff; }
+    .btn-instagram { background:linear-gradient(45deg,#f09433,#e6683c,#dc2743,#cc2366,#bc1888); color:#fff; }
+    .detalhes-grid { display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-bottom:24px; background:#f9fafb; border-radius:12px; padding:16px;font-size:14px;color:#444; }
+    .servicos-lista { list-style:none; padding:0; margin:16px 0; display:grid; grid-template-columns:repeat(3,1fr); gap:12px; }
+    .servicos-lista li { display:flex; flex-direction:column; align-items:center; justify-content:center; padding:16px 10px; border:1px solid #e5e7eb; border-radius:10px; text-align:center; }
+    .servicos-lista label { cursor:pointer; display:flex; flex-direction:column; align-items:center; gap:6px; font-size:14px; width:100%; }
+    .servicos-lista input[type="checkbox"] { width:18px;height:18px; }
+    .servicos-lista .preco { font-weight:700; color:#3b82f6; margin-top:4px; }
+    @media(max-width:500px){ .servicos-lista { grid-template-columns:repeat(2,1fr); } }
+    @media(max-width:350px){ .servicos-lista { grid-template-columns:1fr; } }
+    #resumo { margin-top:15px; font-weight:bold; color:#333; text-align:center; }
+    .no-services { text-align:center;padding:40px;color:#6b7280; }
+    .avaliacao-card { background:#f9fafb; border-radius:12px; padding:16px; margin-bottom:12px; }
+    .avaliacao-card .comentario { color:#4b5563; font-size:14px; margin-top:4px; }
+    .avaliacao-card .data { color:#9ca3af; font-size:12px; margin-top:4px; }
+    .avaliar-form { background:#f3f4f6; border-radius:12px; padding:20px; margin-top:16px; }
+    .star-input { display:flex; gap:4px; font-size:28px; cursor:pointer; }
+    .star-input span { color:#d1d5db; }
+    .star-input span.active { color:#f59e0b; }
+    .star-input span:hover, .star-input span:hover ~ span { color:#f59e0b; }
+    @media(max-width:600px){ .perfil-header { flex-direction:column; text-align:center; } .detalhes-grid { grid-template-columns:1fr; } }
+    .voltar { display:inline-block;margin-top:20px;color:#3b82f6;font-size:14px;font-weight:600;text-decoration:none; }
+    .voltar:hover { text-decoration:underline; }
+  </style>
+</head>
+<body>
+  <div class="container" style="max-width:700px;margin:0 auto">
+    <div class="card">
+
+      <% if (colab.banner) { %>
+        <img src="<%= colab.banner %>" alt="" class="banner">
+      <% } %>
+
+      <div class="perfil-header">
+        <img src="<%= colab.profile_picture || '/img/default-avatar.svg' %>" alt="<%= colab.name %>" class="perfil-avatar">
+        <div class="perfil-info">
+          <h1><%= colab.name %></h1>
+          <div class="sub"><%= colab.subcategory || colab.category %></div>
+          <div class="stars">
+            <% for (var i = 1; i <= 5; i++) { %>
+              <span class="<%= i <= media ? 'star-filled' : 'star-empty' %>">★</span>
+            <% } %>
+            <span style="font-size:13px;color:#6b7280;margin-left:4px"><%= media.toFixed(1) %> (<%= totalAvaliacoes %>)</span>
+          </div>
+          <div class="perfil-contato">
+            <% if (colab.whatsapp) { var wpp = colab.whatsapp.replace(/\D/g,''); %>
+              <a href="https://wa.me/55<%= wpp %>" target="_blank" class="btn-wpp">Falar no WhatsApp</a>
+            <% } %>
+            <% if (colab.instagram) { %>
+              <a href="https://instagram.com/<%= colab.instagram.replace('@','') %>" target="_blank" class="btn-instagram">Instagram</a>
+            <% } %>
+          </div>
+        </div>
+      </div>
+
+      <% if (colab.description) { %>
+        <p style="color:#4b5563;font-size:14px;line-height:1.5;margin-bottom:16px"><%= colab.description %></p>
+      <% } %>
+
+      <div class="detalhes-grid">
+        <span>📍 <%= colab.city || '' %><%= colab.city && colab.state ? ', ' : '' %><%= colab.state || '' %></span>
+        <span>📞 <%= colab.phone || '' %></span>
+        <% if (colab.working_hours) { %><span>🕒 <%= colab.working_hours %></span><% } %>
+        <% if (colab.address) { %><span>🏠 <%= colab.address %></span><% } %>
+      </div>
+
+      <h3>Serviços</h3>
+      <% if (servicos.length > 0) { %>
+        <ul class="servicos-lista" id="servicos-lista">
+          <% servicos.forEach(function(s) { %>
+            <li>
+              <label>
+                <input type="checkbox" value="<%= s.nome %>" data-preco="<%= s.preco %>">
+                <%= s.nome %>
+                <% if (s.descricao) { %><br><small style="color:#9ca3af;font-weight:400"><%= s.descricao %></small><% } %>
+              </label>
+              <span class="preco">R$ <%= s.preco.toFixed(2).replace('.',',') %></span>
+            </li>
+          <% }); %>
+        </ul>
+        <button id="confirmar">Confirmar Seleção</button>
+        <div id="resumo"></div>
+      <% } else { %>
+        <div class="no-services">
+          <p>Este profissional ainda não cadastrou seus serviços.</p>
+          <p>Entre em contato pelo WhatsApp para mais informações.</p>
+        </div>
+      <% } %>
+
+      <h3>Avaliações (<%= totalAvaliacoes %>)</h3>
+
+      <% if (req.session && req.session.userId) { %>
+        <div class="avaliar-form">
+          <p style="font-weight:600;margin:0 0 8px">Deixe sua avaliação</p>
+          <div class="star-input" id="star-input">
+            <span data-value="1">★</span>
+            <span data-value="2">★</span>
+            <span data-value="3">★</span>
+            <span data-value="4">★</span>
+            <span data-value="5">★</span>
+          </div>
+          <textarea id="comentario-input" rows="2" style="width:100%;margin-top:8px;padding:8px;border:1px solid #d1d5db;border-radius:8px;font-family:inherit" placeholder="Conte sua experiência..."></textarea>
+          <button id="btn-avaliar" style="padding:10px 24px;background:#3b82f6;color:#fff;border:none;border-radius:8px;font-weight:600;cursor:pointer;margin-top:10px">Enviar Avaliação</button>
+          <span id="avaliar-msg" style="margin-left:10px;font-size:13px"></span>
+        </div>
+      <% } %>
+
+      <div id="avaliacoes-lista">
+        <% if (avaliacoes.length > 0) { %>
+          <% avaliacoes.forEach(function(a) { %>
+            <div class="avaliacao-card">
+              <div class="stars">
+                <% for (var i = 1; i <= 5; i++) { %>
+                  <span class="<%= i <= a.nota ? 'star-filled' : 'star-empty' %>">★</span>
+                <% } %>
+              </div>
+              <% if (a.comentario) { %><div class="comentario"><%= a.comentario %></div><% } %>
+              <div class="data"><%= a.data %></div>
+            </div>
+          <% }); %>
+        <% } %>
+      </div>
+
+      <a href="javascript:history.back()" class="voltar">← Voltar</a>
+    </div>
+  </div>
+
+  <script>
+    document.getElementById("confirmar")?.addEventListener("click", function() {
+      const selecionados = Array.from(document.querySelectorAll('#servicos-lista input[type="checkbox"]:checked'));
+      const resumoDiv = document.getElementById("resumo");
+
+      if (selecionados.length === 0) {
+        resumoDiv.textContent = "Selecione pelo menos um serviço!";
+        resumoDiv.style.color = "red";
+        return;
+      }
+
+      const servicos = selecionados.map(item => ({
+        nome: item.value,
+        preco: Number(item.getAttribute('data-preco'))
+      }));
+      const total = servicos.reduce((a, b) => a + b.preco, 0);
+
+      localStorage.setItem("servicosSelecionados", JSON.stringify(servicos));
+      localStorage.setItem("valorTotal", total);
+      localStorage.setItem("colaboradorNome", "<%= colab.name %>");
+      localStorage.setItem("colaboradorId", "<%= colab.id %>");
+
+      window.location.href = "/pagamento.html";
+    });
+
+    const starInput = document.getElementById('star-input');
+    let selectedNota = 0;
+    if (starInput) {
+      starInput.querySelectorAll('span').forEach(function(s) {
+        s.addEventListener('click', function() {
+          selectedNota = parseInt(this.getAttribute('data-value'));
+          starInput.querySelectorAll('span').forEach(function(sp) {
+            sp.classList.toggle('active', parseInt(sp.getAttribute('data-value')) <= selectedNota);
+          });
+        });
+        s.addEventListener('mouseenter', function() {
+          var val = parseInt(this.getAttribute('data-value'));
+          starInput.querySelectorAll('span').forEach(function(sp) {
+            sp.classList.toggle('active', parseInt(sp.getAttribute('data-value')) <= val);
+          });
+        });
+        s.addEventListener('mouseleave', function() {
+          starInput.querySelectorAll('span').forEach(function(sp) {
+            sp.classList.toggle('active', parseInt(sp.getAttribute('data-value')) <= selectedNota);
+          });
+        });
+      });
+    }
+
+    const btnAvaliar = document.getElementById('btn-avaliar');
+    const avaliarMsg = document.getElementById('avaliar-msg');
+    if (btnAvaliar) {
+      btnAvaliar.addEventListener('click', function() {
+        if (!selectedNota) { alert('Selecione uma nota de 1 a 5.'); return; }
+        var comentario = document.getElementById('comentario-input').value.trim();
+        btnAvaliar.disabled = true;
+        btnAvaliar.textContent = 'Enviando...';
+        fetch('/colaborador/<%= colab.id %>/avaliar', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ nota: selectedNota, comentario: comentario })
+        }).then(r => r.json()).then(function(data) {
+          if (data.success) {
+            avaliarMsg.textContent = '✓ Avaliação enviada!';
+            avaliarMsg.style.color = '#16a34a';
+            setTimeout(function(){ location.reload(); }, 1500);
+          } else {
+            alert('Erro: ' + (data.error || 'Erro desconhecido'));
+            btnAvaliar.disabled = false;
+            btnAvaliar.textContent = 'Enviar Avaliação';
+          }
+        }).catch(function() {
+          alert('Erro ao enviar avaliação.');
+          btnAvaliar.disabled = false;
+          btnAvaliar.textContent = 'Enviar Avaliação';
+        });
+      });
+    }
+  </script>
+</body>
+</html>

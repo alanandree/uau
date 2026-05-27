@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Login</title>
+  <link rel="stylesheet" href="/css/auth.css">
+</head>
+<body>
+  <div class="split-container">
+    <div class="left-side">
+      <div class="form-wrapper">
+        <h1>Entrar</h1>
+
+        <% if (error) { %>
+          <div class="alert alert-error"><%= error %></div>
+        <% } %>
+
+        <form action="/login" method="POST">
+          <div class="form-group">
+            <label for="email">Email</label>
+            <input type="email" name="email" id="email" value="<%= email %>" required>
+          </div>
+          <div class="form-group">
+            <label for="password">Senha</label>
+            <input type="password" name="password" id="password" required>
+          </div>
+          <button type="submit" class="btn btn-primary">Entrar</button>
+        </form>
+
+        <p class="link">Não tem conta? <a href="/register">Cadastre-se</a></p>
+      </div>
+    </div>
+    <div class="right-side">
+      <a href="/" style="text-decoration:none">
+        <div class="brand-name">
+          <span>F</span><span>I</span><span>X</span><span class="wave">O</span><span class="wave">O</span>
+        </div>
+      </a>
+    </div>
+  </div>
+</body>
+</html>

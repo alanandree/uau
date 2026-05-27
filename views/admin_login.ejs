@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Admin Login - Fixoo</title>
+  <link rel="stylesheet" href="/css/auth.css">
+</head>
+<body>
+  <div class="split-container">
+    <div class="left-side">
+      <div class="form-wrapper">
+        <h1>Admin</h1>
+        <% if (error) { %><div class="alert alert-error"><%= error %></div><% } %>
+        <form action="/admin/login" method="POST">
+          <div class="form-group">
+            <label for="password">Senha de Administrador</label>
+            <input type="password" name="password" id="password" required>
+          </div>
+          <button type="submit" class="btn btn-primary">Entrar</button>
+        </form>
+        <p class="link"><a href="/">Voltar ao site</a></p>
+      </div>
+    </div>
+    <div class="right-side">
+      <a href="/" style="text-decoration:none"><div class="brand-name"><span>F</span><span>I</span><span>X</span><span class="wave">O</span><span class="wave">O</span></div></a>
+    </div>
+  </div>
+</body>
+</html>

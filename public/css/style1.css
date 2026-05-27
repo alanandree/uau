@@ -1,0 +1,120 @@
+
+body {
+  font-family: 'Inter', sans-serif;
+  margin: 0;
+  background: linear-gradient(135deg, #ffffff8a, #3e82ff);
+  color: #222;
+}
+
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 20px 60px;
+  box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+}
+
+.header .logo {
+  color: #3e82ff;
+  font-weight: bold;
+}
+
+.header nav a {
+  margin: 0 15px;
+  text-decoration: none;
+  color: #333;
+  font-weight: 500;
+}
+
+.header nav a:hover {
+  color: #3e82ff;
+}
+
+.titulo {
+  text-align: center;
+  margin: 40px 0 10px;
+}
+
+.titulo h1 {
+  font-size: 2.5rem;
+  color: #3e82ff;
+}
+
+.busca {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin-bottom: 40px;
+}
+
+.busca input {
+  width: 50%;
+  padding: 10px 15px;
+  border-radius: 20px;
+  border: 1px solid #ddd;
+  font-size: 1rem;
+}
+
+.busca button {
+  margin-left: 10px;
+  padding: 10px 20px;
+  background: #3e82ff;
+  color: white;
+  border: none;
+  border-radius: 20px;
+  cursor: pointer;
+}
+
+.lista-servicos {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 20px;
+  padding: 0 60px 60px;
+}
+
+.servico {
+  display: flex;
+  align-items: center;
+  background: #fafafa;
+  border-radius: 12px;
+  padding: 20px;
+  width: 420px;
+  box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+  transition: 0.2s;
+}
+
+.servico:hover {
+  transform: scale(1.02);
+  box-shadow: 0 4px 15px rgba(0,0,0,0.08);
+}
+
+.servico img {
+  width: 80px;
+  height: 80px;
+  border-radius: 10px;
+  object-fit: cover;
+  margin-right: 20px;
+}
+
+.servico .info {
+  flex: 1;
+}
+
+.servico h3 {
+  margin: 0 0 5px;
+  font-size: 1.2rem;
+}
+
+.servico p {
+  margin: 2px 0;
+  color: #666;
+}
+
+.servico .avaliacao {
+  background: #000000;
+  color: white;
+  padding: 4px 8px;
+  border-radius: 6px;
+  font-size: 0.85rem;
+}

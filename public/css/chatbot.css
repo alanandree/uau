@@ -1,0 +1,131 @@
+body {
+  font-family: Arial, sans-serif;
+  background: #e8eaed;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+  margin: 0;
+}
+
+.chat-container {
+  width: 400px;
+  height: 100%; /* ocupa todo o popup */
+  background: white;
+  border-radius: 10px;
+  box-shadow: 0 0 10px rgba(0,0,0,0.2);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden; /* mantém input fixo */
+}
+
+/* CABEÇALHO DO CHAT */
+.chat-header {
+    display: flex;
+    align-items: center;
+    padding: 10px 15px;
+    background: #007bff;
+    color: white;
+    font-weight: bold;
+    font-size: 18px;
+    border-top-left-radius: 10px;
+    border-top-right-radius: 10px;
+}
+
+.chat-emoji {
+    margin-right: 10px;
+    font-size: 24px;
+}
+
+.chat-name {
+    font-size: 18px;
+}
+
+.chat-box {
+  flex: 1;           /* ocupa espaço entre header e input */
+  padding: 15px;
+  overflow-y: auto;  /* permite rolagem vertical */
+  scroll-behavior: smooth; /* rolagem suave */
+}
+
+/* MENSAGENS */
+.message {
+  margin: 8px 0;
+  padding: 10px 14px;
+  border-radius: 10px;
+  max-width: 85%;
+  font-size: 15px;
+  line-height: 1.5;
+
+  white-space: pre-wrap; 
+  word-break: break-word;
+  overflow-wrap: break-word;
+  box-sizing: border-box;
+}
+
+.user {
+  background: #d1e7dd;
+  align-self: flex-end;
+}
+
+.bot {
+  background: #f8d7da;
+  align-self: flex-start;
+}
+
+/* INPUT */
+.chat-input {
+  display: flex;
+  border-top: 1px solid #ccc;
+}
+
+.chat-input input {
+  flex: 1;
+  padding: 10px;
+  border: none;
+  outline: none;
+  font-size: 15px;
+}
+
+.chat-input button {
+  background: #007bff;
+  color: white;
+  border: none;
+  padding: 10px 15px;
+  cursor: pointer;
+  transition: background 0.2s ease;
+}
+
+.chat-input button:hover {
+  background: #0056b3;
+}
+
+/* === POP-UP DO CHAT === */
+#chatButton {
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+  background: #007bff;
+  color: white;
+  width: 65px;
+  height: 65px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 32px;
+  cursor: pointer;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+  z-index: 9999;
+}
+
+#chatPopup {
+  position: fixed;
+  bottom: 100px;
+  right: 20px;
+  width: 400px;
+  height: 550px;
+  display: none; /* começa oculto */
+  flex-direction: column;
+  z-index: 9998;
+}

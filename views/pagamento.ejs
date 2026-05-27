@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Pagamento - Fixoo</title>
+  <link rel="stylesheet" href="/css/pagamento.css">
+  <style>
+    body { background: linear-gradient(135deg, #f0f4ff, #dbeafe); font-family: "Inter", system-ui, Arial, sans-serif; }
+    .fixoo-logo { text-align:center; margin-bottom:20px; }
+    .fixoo-logo a { text-decoration:none; }
+    .btn-voltar { display:inline-block; margin-top:16px; color:#3b82f6; font-size:14px; font-weight:600; text-decoration:none; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="fixoo-logo">
+      <a href="/"><strong style="font-size:24px;color:#3b82f6">FIXOO</strong></a>
+    </div>
+
+    <h1>Escolha a forma de pagamento</h1>
+
+    <div class="resumo-pedido" id="resumo-pedido">
+      <strong>Resumo do pedido</strong><br>
+      <span><%= pedido.colab_name %></span><br>
+      <span id="servicos-lista">
+        <% servicos.forEach(function(s, i) { %>
+          <%= s.nome %><%= i < servicos.length - 1 ? ', ' : '' %>
+        <% }); %>
+      </span><br>
+      <strong>Total:</strong> R$ <span id="total-valor"><%= pedido.total.toFixed(2).replace('.',',') %></span>
+    </div>
+
+    <section class="pagamento-section">
+      <h2>PIX</h2>
+      <div class="pix-container">
+        <div class="pix-qr" title="QR Code PIX"></div>
+        <div>
+          <code id="codigoPix" class="pix-codigo" onclick="copiarPix()">00020126330014BR.GOV.BCB.PIX0136+55819999999990215<%= pedido.colab_name.replace(/\s/g,'') %>5204000053039865405<%= pedido.total.toFixed(2) %>5802BR5913<%= pedido.colab_name %>6009Brasil62070503***63041D3D</code>
+          <button class="btn-copiar" onclick="copiarPix()">Copiar</button>
+        </div>
+      </div>
+      <small style="color:#666;">Abra seu app de banco e escaneie o QR code ou copie o código acima.</small>
+    </section>
+
+    <section class="pagamento-section">
+      <h2>Cartão de crédito/débito</h2>
+      <form class="cartao-form" onsubmit="event.preventDefault(); processarCartao()">
+        <input type="text" name="nome" placeholder="Nome no cartão" required autocomplete="cc-name">
+        <input type="text" name="numero" placeholder="Número do cartão" maxlength="19" pattern="[0-9\s]{13,19}" required autocomplete="cc-number">
+        <input type="text" name="validade" placeholder="Validade (MM/AA)" maxlength="5" pattern="(0[1-9]|1[0-2])\/?([0-9]{2})" required autocomplete="cc-exp">
+        <input type="text" name="cvv" placeholder="CVV" maxlength="4" pattern="\d{3,4}" required autocomplete="cc-csc">
+        <div class="seguranca">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="20" height="20"><path d="M12 1C8.13 1 5 4.13 5 8v5H4a1 1 0 0 0-1 1v7a1 1 0 0 0 1 1h16a1 1 0 0 0 1-1v-7a1 1 0 0 0-1-1h-1V8c0-3.87-3.13-7-7-7zm-3 7v3H9v-3a3 3 0 0 1 6 0v3h-1v-3a2 2 0 0 0-4 0z"/></svg>
+          <span>Pagamento seguro e criptografado</span>
+        </div>
+        <button type="submit" class="btn-pagar-cartao">Pagar com cartão</button>
+      </form>
+    </section>
+
+    <section class="pagamento-section">
+      <h2>Dinheiro (Pagamento na entrega)</h2>
+      <p class="dinheiro-texto">Você pode pagar em dinheiro no momento do serviço.</p>
+      <label class="checkbox-label">
+        <input type="checkbox" id="dinheiroCheckbox">
+        Confirmo que vou pagar em dinheiro na entrega
+      </label>
+    </section>
+
+    <button class="btn-finalizar" onclick="finalizarPagamento()">Finalizar pedido</button>
+    <br>
+    <a href="javascript:history.back()" class="btn-voltar">← Voltar</a>
+  </div>
+
+  <script>
+    function copiarPix() {
+      var pix = document.getElementById('codigoPix');
+      navigator.clipboard.writeText(pix.textContent).then(function() {
+        alert('Código PIX copiado!');
+      });
+    }
+
+    function processarCartao() {
+      alert('Pagamento com cartão processado com sucesso!');
+      finalizarPedido();
+    }
+
+    function finalizarPagamento() {
+      var dinheiroOk = document.getElementById('dinheiroCheckbox').checked;
+      if (!dinheiroOk) {
+        if (!confirm('Confirma que deseja finalizar o pedido?')) return;
+      }
+      finalizarPedido();
+    }
+
+    function finalizarPedido() {
+      fetch('/pedido/<%= pedido.id %>/confirmar', { method: 'POST' })
+        .then(function(r) { return r.json(); })
+        .then(function(data) {
+          if (data.success) {
+            window.location.href = '/pedido/<%= pedido.id %>/confirmacao';
+          }
+        })
+        .catch(function() {
+          window.location.href = '/pedido/<%= pedido.id %>/confirmacao';
+        });
+    }
+  </script>
+</body>
+</html>

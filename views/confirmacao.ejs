@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Serviço Agendado - Fixoo</title>
+  <style>
+    body {
+      font-family: "Inter", system-ui, Arial, sans-serif;
+      background: linear-gradient(135deg, #f0f4ff, #dbeafe);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+      margin: 0;
+      padding: 20px;
+    }
+    .container {
+      background: white;
+      border-radius: 16px;
+      padding: 40px;
+      text-align: center;
+      box-shadow: 0 10px 25px rgba(0,0,0,0.08);
+      max-width: 420px;
+      width: 100%;
+      animation: aparecer 0.6s ease;
+    }
+    @keyframes aparecer {
+      from { opacity:0; transform:translateY(-20px); }
+      to { opacity:1; transform:translateY(0); }
+    }
+    .check {
+      width: 80px; height: 80px; border-radius: 50%;
+      background: #10b981;
+      display: flex; justify-content: center; align-items: center;
+      margin: 0 auto 20px;
+      animation: pop 0.5s ease;
+    }
+    @keyframes pop {
+      0% { transform:scale(0); }
+      80% { transform:scale(1.1); }
+      100% { transform:scale(1); }
+    }
+    .check svg { fill:white; width:40px; height:40px; }
+    h2 { color:#111827; margin-bottom:8px; }
+    p { color:#6b7280; margin-bottom:8px; font-size:15px; }
+    .detalhes { background:#f9fafb; border-radius:12px; padding:16px; margin:16px 0; text-align:left; font-size:14px; }
+    .detalhes strong { display:block; margin-bottom:4px; }
+    .btn-voltar {
+      display:inline-block; margin-top:8px; padding:12px 28px;
+      background:#3b82f6; color:white; border:none; border-radius:10px;
+      font-size:16px; font-weight:600; cursor:pointer; text-decoration:none;
+    }
+    .btn-voltar:hover { background:#2563eb; }
+    footer { margin-top:24px; font-size:13px; color:#9ca3af; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="check">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+        <path d="M9 19.4L3.6 14l1.4-1.4L9 16.6l10-10L20.4 8z"/>
+      </svg>
+    </div>
+    <h2>Serviço Agendado com Sucesso!</h2>
+    <p>Seu pedido foi registrado. O profissional entrará em contato.</p>
+
+    <div class="detalhes">
+      <strong><%= pedido.colab_name %></strong>
+      <span style="color:#6b7280;font-size:13px">Pedido #<%= pedido.id %></span><br>
+      <span style="color:#111827;font-weight:600">Total: R$ <%= pedido.total.toFixed(2).replace('.',',') %></span>
+    </div>
+
+    <a href="/" class="btn-voltar">Voltar ao Início</a>
+
+    <footer>© 2025 Fixoo — Todos os direitos reservados.</footer>
+  </div>
+</body>
+</html>

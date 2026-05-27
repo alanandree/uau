@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Dashboard</title>
+  <link rel="stylesheet" href="/css/auth.css">
+  <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+  <div class="split-container">
+    <div class="left-side">
+      <div class="form-wrapper">
+        <h1>Bem-vindo, <%= user.name %>!</h1>
+        <div class="user-info">
+          <p><strong>Nome:</strong> <%= user.name %></p>
+          <p><strong>Email:</strong> <%= user.email %></p>
+          <p><strong>Membro desde:</strong> <%= new Date(user.createdAt).toLocaleDateString('pt-BR') %></p>
+        </div>
+        <a href="/perfil" class="btn btn-secondary">Meu Perfil</a>
+        <a href="/logout" class="btn btn-secondary">Sair</a>
+        <a href="/" class="btn btn-secondary" style="margin-top: 8px;">Ir para o Site</a>
+      </div>
+    </div>
+    <div class="right-side">
+      <div class="brand-name">
+        <span>F</span><span>I</span><span>X</span><span class="wave">O</span><span class="wave">O</span>
+      </div>
+    </div>
+  </div>
+</body>
+</html>

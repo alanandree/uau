@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Barbearia Estilo</title>
+    <link rel="stylesheet" href="css/barbeiro.css">
+</head>
+<body>
+    <div class="container">
+        <div class="card">
+            <div class="header">
+                <img src="img/barber.jpeg" alt="Logo Barbearia">
+                <div class="info">
+                    <h2>Barbearia Estilo</h2>
+                    <p>📍 Localização: Rua dos Cortes, 123 - Centro</p>
+                    <p>⭐ Avaliação: 4.9 / 5</p>
+                    <p>🕒 Horário: Seg a Sáb - 9h às 20h</p>
+                </div>
+            </div>
+
+            <h3>Serviços</h3>
+            <ul class="servicos">
+                <li><label><input type="checkbox" value="Corte masculino" data-preco="35"> Corte masculino <span>R$ 35,00</span></label></li>
+                <li><label><input type="checkbox" value="Barba completa" data-preco="25"> Barba completa <span>R$ 25,00</span></label></li>
+                <li><label><input type="checkbox" value="Corte + Barba" data-preco="55"> Corte + Barba <span>R$ 55,00</span></label></li>
+                <li><label><input type="checkbox" value="Sobrancelha masculina" data-preco="15"> Sobrancelha masculina <span>R$ 15,00</span></label></li>
+                <li><label><input type="checkbox" value="Hidratação capilar" data-preco="20"> Hidratação capilar <span>R$ 20,00</span></label></li>
+                <li><label><input type="checkbox" value="Camuflagem dos fios brancos" data-preco="40"> Camuflagem dos fios brancos <span>R$ 40,00</span></label></li>
+            </ul>
+
+            <button id="confirmar">Confirmar Seleção</button>
+            <div id="resumo"></div>
+      
+        <footer>
+            © 2025 Barbearia Estilo — Todos os direitos reservados.
+        </footer>
+    </div>
+
+    
+
+    <script src="barbeiro.js"></script>
+</body>
+</html>

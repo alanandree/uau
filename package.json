@@ -1,0 +1,32 @@
+{
+  "name": "meu-site",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "dependencies": {
+    "@google/generative-ai": "^0.24.1",
+    "bcryptjs": "^2.4.3",
+    "dotenv": "^17.4.2",
+    "ejs": "^3.1.10",
+    "express": "^5.2.1",
+    "express-session": "^1.18.0",
+    "multer": "^2.1.1",
+    "openai": "^6.35.0",
+    "sqlite3": "^5.1.7"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Renatohost/Site-final.git"
+  },
+  "bugs": {
+    "url": "https://github.com/Renatohost/Site-final/issues"
+  },
+  "homepage": "https://github.com/Renatohost/Site-final#readme"
+}

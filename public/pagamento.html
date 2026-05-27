@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Forma de Pagamento - Barbearia Estilo</title>
+  <link rel="stylesheet" href="css/pagamento.css" />
+</head>
+<body>
+  <div class="container">
+    <h1>Escolha a forma de pagamento</h1>
+
+    <div class="resumo-pedido" id="resumo-pedido">
+      <strong>Resumo do pedido:</strong><br />
+      <span id="servicos-lista" style="font-size:13px">Nenhum serviço selecionado</span><br />
+      <strong>Total:</strong> R$ <span id="total-valor">0,00</span>
+    </div>
+
+    <!-- PIX -->
+    <section class="pagamento-section">
+      <h2>PIX</h2>
+      <div class="pix-container">
+        <div class="pix-qr" title="QR Code PIX"></div>
+        <div>
+          <code id="codigoPix" class="pix-codigo" onclick="copiarPix()">00020126330014BR.GOV.BCB.PIX0136+55819999999990215BarbeariaEstilo520400005303986540560.005802BR5913Barbearia Estilo6009Recife62070503***63041D3D</code>
+          <button class="btn-copiar" onclick="copiarPix()">Copiar</button>
+        </div>
+      </div>
+      <small style="color:#666;">Abra seu app de banco e escaneie o QR code ou copie o código acima.</small>
+    </section>
+
+    <!-- Cartão -->
+    <section class="pagamento-section">
+      <h2>Cartão de crédito/débito</h2>
+      <form class="cartao-form" onsubmit="event.preventDefault(); alert('Pagamento com cartão processado!');">
+        <input type="text" name="nome" placeholder="Nome no cartão" required autocomplete="cc-name" />
+        <input type="text" name="numero" placeholder="Número do cartão" maxlength="19" pattern="[0-9\s]{13,19}" required autocomplete="cc-number" />
+        <input type="text" name="validade" placeholder="Validade (MM/AA)" maxlength="5" pattern="(0[1-9]|1[0-2])\/?([0-9]{2})" required autocomplete="cc-exp" />
+        <input type="text" name="cvv" placeholder="CVV" maxlength="4" pattern="\d{3,4}" required autocomplete="cc-csc" />
+        <div class="seguranca">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 1C8.13 1 5 4.13 5 8v5H4a1 1 0 0 0-1 1v7a1 1 0 0 0 1 1h16a1 1 0 0 0 1-1v-7a1 1 0 0 0-1-1h-1V8c0-3.87-3.13-7-7-7zm-3 7v3H9v-3a3 3 0 0 1 6 0v3h-1v-3a2 2 0 0 0-4 0z"/></svg>
+          <span>Pagamento seguro e criptografado</span>
+        </div>
+        <button type="submit" class="btn-pagar-cartao">Pagar com cartão</button>
+      </form>
+    </section>
+
+    <!-- Dinheiro -->
+    <section class="pagamento-section">
+      <h2>Dinheiro (Pagamento na entrega)</h2>
+      <p class="dinheiro-texto">Você pode pagar em dinheiro no momento do serviço/entrega.</p>
+      <label class="checkbox-label">
+        <input type="checkbox" id="dinheiroCheckbox" />
+        Confirmo que vou pagar em dinheiro na entrega
+      </label>
+    </section>
+
+   <button class="btn-finalizar" onclick="finalizarPagamento()">Finalizar pedido</button>
+   <br>
+   <a href="javascript:history.back()" style="display:inline-block;margin-top:12px;color:#3b82f6;font-size:14px;font-weight:600;text-decoration:none">← Voltar</a>
+  </div>
+
+  <script src="js/pagamento.js"></script>
+</body>
+</html>

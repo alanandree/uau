@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Admin - Fixoo</title>
+  <link rel="stylesheet" href="/css/auth.css">
+  <style>
+    body { background: linear-gradient(180deg, #1e293b 0%, #3b82f6 100%); }
+    .admin-table { width:100%; border-collapse:collapse; background:rgba(255,255,255,0.95); border-radius:12px; overflow:hidden; color:#1e293b; font-size:14px; }
+    .admin-table th { background:#3b82f6; color:#fff; padding:12px 10px; text-align:left; font-size:13px; }
+    .admin-table td { padding:10px; border-bottom:1px solid #e2e8f0; }
+    .admin-table tr:hover { background:#f1f5f9; }
+    .badge { display:inline-block; padding:3px 10px; border-radius:20px; font-size:12px; font-weight:600; }
+    .badge-aprovado { background:#dcfce7; color:#16a34a; }
+    .badge-pendente { background:#fef3c7; color:#d97706; }
+    .btn-admin { padding:6px 14px; border:none; border-radius:6px; font-size:12px; font-weight:600; cursor:pointer; color:#fff; }
+    .btn-aprovar { background:#16a34a; }
+    .btn-reprovar { background:#dc2626; }
+    .btn-admin:hover { opacity:0.85; }
+    .scroll { overflow-x:auto; }
+    .form-wrapper h1 { font-size:22px; }
+    .form-wrapper { max-width:95%; }
+  </style>
+</head>
+<body>
+  <div class="split-container" style="flex-direction:column;height:auto;min-height:100vh">
+    <div style="background:rgba(255,255,255,0.95);padding:16px 32px;display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid #e2e8f0">
+      <strong style="color:#3b82f6;font-size:20px;">FIXOO - Admin</strong>
+      <a href="/admin/login?logout=1" style="color:#dc2626;font-size:13px;text-decoration:none" onclick="document.cookie='connect.sid=;max-age=0'">Sair</a>
+    </div>
+    <div class="left-side" style="padding:32px">
+      <div class="form-wrapper">
+        <h1 style="color:#1e293b">Colaboradores Cadastrados</h1>
+        <p style="color:#64748b;margin-bottom:20px;font-size:14px">Total: <%= colaboradores.length %></p>
+        <% if (colaboradores.length > 0) { %>
+          <div class="scroll">
+            <table class="admin-table">
+              <thead>
+                <tr>
+                  <th>ID</th>
+                  <th>Nome</th>
+                  <th>CPF</th>
+                  <th>Email</th>
+                  <th>Telefone</th>
+                  <th>Categoria</th>
+                  <th>Cidade</th>
+                  <th>Status</th>
+                  <th>Ações</th>
+                </tr>
+              </thead>
+              <tbody>
+                <% colaboradores.forEach(function(c) { %>
+                  <tr>
+                    <td><%= c.id %></td>
+                    <td><strong><%= c.name %></strong></td>
+                    <td><%= c.cpf %></td>
+                    <td><%= c.email %></td>
+                    <td><%= c.phone %></td>
+                    <td><%= c.category %></td>
+                    <td><%= c.city || '-' %></td>
+                    <td><span class="badge <%= c.approved ? 'badge-aprovado' : 'badge-pendente' %>"><%= c.approved ? 'Aprovado' : 'Pendente' %></span></td>
+                    <td style="display:flex;gap:6px">
+                      <% if (!c.approved) { %>
+                        <form action="/admin/aprovar/<%= c.id %>" method="POST" style="display:inline">
+                          <button type="submit" class="btn-admin btn-aprovar">Aprovar</button>
+                        </form>
+                      <% } %>
+                      <form action="/admin/reprovar/<%= c.id %>" method="POST" style="display:inline" onsubmit="return confirm('Excluir <%= c.name %>?')">
+                        <button type="submit" class="btn-admin btn-reprovar">Excluir</button>
+                      </form>
+                    </td>
+                  </tr>
+                <% }); %>
+              </tbody>
+            </table>
+          </div>
+        <% } else { %>
+          <p style="color:#94a3b8;font-style:italic">Nenhum colaborador cadastrado ainda.</p>
+        <% } %>
+        <a href="/" style="display:inline-block;margin-top:20px;color:#3b82f6;font-size:14px">← Voltar ao site</a>
+      </div>
+    </div>
+  </div>
+</body>
+</html>

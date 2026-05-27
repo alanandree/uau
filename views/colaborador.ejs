@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Seja um Colaborador - Fixoo</title>
+  <link rel="stylesheet" href="/css/colaborador.css">
+</head>
+<body>
+  <header class="topo">
+    <a href="/" class="brand-link">FIXOO</a>
+    <nav>
+      <a href="/">Início</a>
+      <a href="/perfil">Perfil</a>
+    </nav>
+  </header>
+
+  <main class="container">
+    <div class="form-card">
+      <div class="form-header">
+        <h1>Seja um Colaborador</h1>
+        <p>Cadastre seu serviço no Fixoo e alcance mais clientes na sua região!</p>
+      </div>
+
+      <% if (error) { %>
+        <div class="alert alert-error"><%= error %></div>
+      <% } %>
+      <% if (success) { %>
+        <div class="alert alert-success"><%- success %></div>
+      <% } %>
+
+      <form action="/colaborador" method="POST" enctype="multipart/form-data" class="colab-form">
+        <fieldset>
+          <legend>Dados Pessoais</legend>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label for="name">Nome completo *</label>
+              <input type="text" name="name" id="name" required>
+            </div>
+            <div class="form-group">
+              <label for="cpf">CPF *</label>
+              <input type="text" name="cpf" id="cpf" placeholder="000.000.000-00" required>
+            </div>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label for="email">Email *</label>
+              <input type="email" name="email" id="email" required>
+            </div>
+            <div class="form-group">
+              <label for="phone">Telefone *</label>
+              <input type="text" name="phone" id="phone" placeholder="(XX) XXXXX-XXXX" required>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label for="password">Senha *</label>
+            <input type="password" name="password" id="password" minlength="6" required>
+            <small>Mínimo de 6 caracteres</small>
+          </div>
+
+          <div class="form-group">
+            <label>Foto de perfil</label>
+            <div class="file-upload">
+              <input type="file" name="profile_picture" id="profile_picture" accept="image/*">
+              <label for="profile_picture" class="file-label">Escolher arquivo</label>
+              <span id="file-name">Nenhum arquivo selecionado</span>
+            </div>
+          </div>
+        </fieldset>
+
+        <fieldset>
+          <legend>Dados do Serviço</legend>
+
+          <div class="form-group">
+            <label for="category">Categoria do serviço *</label>
+            <select name="category" id="category" required>
+              <option value="">Selecione...</option>
+              <option value="Moda e Beleza">Moda e Beleza</option>
+              <option value="Assistência Técnica">Assistência Técnica</option>
+              <option value="Saúde">Saúde</option>
+              <option value="Reformas e Serviços">Reformas e Serviços</option>
+              <option value="Serviços Domésticos">Serviços Domésticos</option>
+              <option value="Outros">Outros</option>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label for="subcategory">Subcategoria / Especialidade</label>
+            <input type="text" name="subcategory" id="subcategory" placeholder="Ex: Corte de cabelo, Encanamento, Limpeza pesada...">
+          </div>
+
+          <div class="form-group">
+            <label for="description">Descrição do seu trabalho</label>
+            <textarea name="description" id="description" rows="4" placeholder="Conte um pouco sobre seus serviços, experiência, diferenciais..."></textarea>
+          </div>
+
+          <div class="form-group">
+            <label for="instagram">Instagram (opcional)</label>
+            <input type="text" name="instagram" id="instagram" placeholder="@seuinstagram">
+          </div>
+        </fieldset>
+
+        <fieldset>
+          <legend>Localização</legend>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label for="city">Cidade</label>
+              <input type="text" name="city" id="city" placeholder="Sua cidade">
+            </div>
+            <div class="form-group">
+              <label for="state">Estado</label>
+              <select name="state" id="state">
+                <option value="">Selecione...</option>
+                <option value="AC">AC</option><option value="AL">AL</option><option value="AP">AP</option>
+                <option value="AM">AM</option><option value="BA">BA</option><option value="CE">CE</option>
+                <option value="DF">DF</option><option value="ES">ES</option><option value="GO">GO</option>
+                <option value="MA">MA</option><option value="MT">MT</option><option value="MS">MS</option>
+                <option value="MG">MG</option><option value="PA">PA</option><option value="PB">PB</option>
+                <option value="PR">PR</option><option value="PE">PE</option><option value="PI">PI</option>
+                <option value="RJ">RJ</option><option value="RN">RN</option><option value="RS">RS</option>
+                <option value="RO">RO</option><option value="RR">RR</option><option value="SC">SC</option>
+                <option value="SP">SP</option><option value="SE">SE</option><option value="TO">TO</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label for="address">Endereço completo</label>
+            <input type="text" name="address" id="address" placeholder="Rua, número, bairro...">
+          </div>
+
+          <div class="form-group">
+            <label for="whatsapp">WhatsApp para contato</label>
+            <input type="text" name="whatsapp" id="whatsapp" placeholder="(XX) XXXXX-XXXX">
+          </div>
+        </fieldset>
+
+        <button type="submit" class="btn-submit">Enviar Cadastro</button>
+      </form>
+
+      <p class="footer-note">Ao cadastrar, você concorda com nossos termos de uso. Analisaremos seu cadastro e entraremos em contato pelo WhatsApp.</p>
+    </div>
+  </main>
+
+  <script>
+    document.getElementById('cpf').addEventListener('input', function(e) {
+      let v = e.target.value.replace(/\D/g, '').substring(0, 11);
+      if (v.length > 9) v = v.replace(/^(\d{3})(\d{3})(\d{3})(\d{2})$/, '$1.$2.$3-$4');
+      else if (v.length > 6) v = v.replace(/^(\d{3})(\d{3})(\d{1,3})$/, '$1.$2.$3');
+      else if (v.length > 3) v = v.replace(/^(\d{3})(\d{1,3})$/, '$1.$2');
+      e.target.value = v;
+    });
+
+    document.getElementById('phone').addEventListener('input', function(e) {
+      let v = e.target.value.replace(/\D/g, '').substring(0, 11);
+      if (v.length > 6) v = v.replace(/^(\d{2})(\d{5})(\d{4})$/, '($1) $2-$3');
+      else if (v.length > 2) v = v.replace(/^(\d{2})(\d{1,4})$/, '($1) $2');
+      else if (v.length > 0) v = v.replace(/^(\d{1,2})$/, '($1');
+      e.target.value = v;
+    });
+
+    document.getElementById('whatsapp').addEventListener('input', function(e) {
+      let v = e.target.value.replace(/\D/g, '').substring(0, 11);
+      if (v.length > 6) v = v.replace(/^(\d{2})(\d{5})(\d{4})$/, '($1) $2-$3');
+      else if (v.length > 2) v = v.replace(/^(\d{2})(\d{1,4})$/, '($1) $2');
+      else if (v.length > 0) v = v.replace(/^(\d{1,2})$/, '($1');
+      e.target.value = v;
+    });
+
+    document.getElementById('profile_picture').addEventListener('change', function() {
+      document.getElementById('file-name').textContent = this.files[0] ? this.files[0].name : 'Nenhum arquivo selecionado';
+    });
+  </script>
+</body>
+</html>

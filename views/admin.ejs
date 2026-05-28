@@ -58,18 +58,18 @@
                   <th>Ações</th>
                 </tr>
               </thead>
-              <tbody>
+                  <tbody>
                 <% colaboradores.forEach(function(c) { %>
                   <tr>
-                    <td><%= c.id %></td>
-                    <td><strong><%= c.name %></strong></td>
-                    <td><%= c.cpf %></td>
-                    <td><%= c.email %></td>
-                    <td><%= c.phone %></td>
-                    <td><%= c.category %></td>
-                    <td><%= c.city || '-' %></td>
-                    <td><span class="badge <%= c.approved ? 'badge-aprovado' : 'badge-pendente' %>"><%= c.approved ? 'Aprovado' : 'Pendente' %></span></td>
-                    <td style="display:flex;gap:6px">
+                    <td data-label="ID"><%= c.id %></td>
+                    <td data-label="Nome"><strong><%= c.name %></strong></td>
+                    <td data-label="CPF"><%= c.cpf %></td>
+                    <td data-label="Email"><%= c.email %></td>
+                    <td data-label="Telefone"><%= c.phone %></td>
+                    <td data-label="Categoria"><%= c.category %></td>
+                    <td data-label="Cidade"><%= c.city || '-' %></td>
+                    <td data-label="Status"><span class="badge <%= c.approved ? 'badge-aprovado' : 'badge-pendente' %>"><%= c.approved ? 'Aprovado' : 'Pendente' %></span></td>
+                    <td data-label="Ações" style="display:flex;gap:6px">
                       <% if (!c.approved) { %>
                         <form action="/admin/aprovar/<%= c.id %>" method="POST" style="display:inline">
                           <button type="submit" class="btn-admin btn-aprovar">Aprovar</button>

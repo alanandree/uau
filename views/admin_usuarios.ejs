@@ -51,23 +51,23 @@
                   <th>Cadastro</th>
                 </tr>
               </thead>
-              <tbody>
+                  <tbody>
                 <% usuarios.forEach(function(u) { %>
                   <tr>
-                    <td><%= u.id %></td>
-                    <td><strong><%= u.name %></strong></td>
-                    <td><%= u.email %></td>
-                    <td><%= u.phone || '-' %></td>
-                    <td style="font-size:11px;">
+                    <td data-label="ID"><%= u.id %></td>
+                    <td data-label="Nome"><strong><%= u.name %></strong></td>
+                    <td data-label="Email"><%= u.email %></td>
+                    <td data-label="Telefone"><%= u.phone || '-' %></td>
+                    <td data-label="Enderecos" style="font-size:11px;">
                       <% 
                         var enderecos = [];
                         try { enderecos = JSON.parse(u.addresses || '[]'); } catch(e) {}
                       %>
                       <%= enderecos.length %> endereco(s)
                     </td>
-                    <td><%= u.cliente_rating || 0 %></td>
-                    <td><%= u.cliente_total_avaliacoes || 0 %></td>
-                    <td style="font-size:11px;white-space:nowrap"><%= u.createdAt %></td>
+                    <td data-label="Rating"><%= u.cliente_rating || 0 %></td>
+                    <td data-label="Avaliacoes"><%= u.cliente_total_avaliacoes || 0 %></td>
+                    <td data-label="Cadastro" style="font-size:11px;white-space:nowrap"><%= u.createdAt %></td>
                   </tr>
                 <% }); %>
               </tbody>

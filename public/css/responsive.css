@@ -4,9 +4,9 @@
 /* --- GLOBAL MOBILE RESET --- */
 @media (max-width: 768px) {
   body {
-    background: linear-gradient(135deg, #ffffff8a, #3e82ff) !important;
     padding: 0 !important;
     display: block !important;
+    background: linear-gradient(180deg, #dbeafe 0%, #ffffff 100%) !important;
   }
   .wrap {
     max-width: 100%;
@@ -32,8 +32,9 @@
     left: 0 !important;
     right: 0 !important;
     z-index: 1000 !important;
-    background: linear-gradient(135deg, #ffffff8a, #e8f0ff) !important;
-    border-bottom: 1px solid #e2e8f0 !important;
+    background: rgba(255,255,255,0.92) !important;
+    backdrop-filter: blur(10px);
+    border-bottom: 1px solid #bfdbfe !important;
     padding: 6px 12px !important;
     box-shadow: 0 4px 12px rgba(59, 130, 246, 0.08) !important;
     height: 52px;
@@ -290,15 +291,16 @@
 /* --- CHAT BOT: afastar da bottom nav --- */
 @media (max-width: 768px) {
   #chatButton {
-    bottom: 70px !important;
+    bottom: 90px !important;
+    right: 16px !important;
     width: 56px !important;
     height: 56px !important;
     font-size: 26px !important;
   }
   #chatPopup {
-    bottom: 130px !important;
-    right: 12px !important;
-    width: calc(100vw - 24px) !important;
+    bottom: 156px !important;
+    right: 16px !important;
+    width: calc(100vw - 32px) !important;
     height: 60vh !important;
     max-height: 450px;
   }

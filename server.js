@@ -400,6 +400,18 @@ app.get('/api/colaboradores', (req, res) => {
   db.all(sql, params, (err, rows) => { res.json(rows || []); });
 });
 
+app.get('/buscar', (req, res) => {
+  const q = req.query.q;
+  if (!q || q.trim() === '') return res.redirect('/');
+  const term = '%' + q.trim() + '%';
+  db.all("SELECT id, name, profile_picture, category, subcategory, description, city, state, whatsapp, instagram, rating FROM colaboradores WHERE approved = 1 AND (name LIKE ? OR category LIKE ? OR subcategory LIKE ? OR description LIKE ? OR city LIKE ?)", [term, term, term, term, term], (err, rows) => {
+    const allCategories = ['Moda e Beleza', 'Assistência Técnica', 'Saúde', 'Reformas e Serviços', 'Serviços Domésticos', 'Outros'];
+    const slugRev = { 'Moda e Beleza': 'moda-e-beleza', 'Assistência Técnica': 'assistencia-tecnica', 'Saúde': 'saude', 'Reformas e Serviços': 'reformas', 'Serviços Domésticos': 'servicos-domesticos', 'Outros': 'outros' };
+    const categorias = allCategories.filter(c => c.toLowerCase().includes(q.trim().toLowerCase())).map(c => ({ nome: c, slug: slugRev[c] }));
+    res.render('busca', { query: q.trim(), colaboradores: rows || [], categorias });
+  });
+});
+
 const slugMap = {
   'moda-e-beleza': 'Moda e Beleza',
   'assistencia-tecnica': 'Assistência Técnica',

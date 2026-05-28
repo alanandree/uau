@@ -16,7 +16,10 @@
         <form action="/admin/login" method="POST">
           <div class="form-group">
             <label for="password">Senha de Administrador</label>
-            <input type="password" name="password" id="password" required>
+            <div style="position:relative">
+              <input type="password" name="password" id="password" required style="padding-right:40px">
+              <span onclick="var i=this.previousElementSibling;if(i.type==='password'){i.type='text';this.textContent='🙈'}else{i.type='password';this.textContent='👁'}" style="position:absolute;right:10px;top:50%;transform:translateY(-50%);cursor:pointer;font-size:18px;user-select:none">👁</span>
+            </div>
           </div>
           <button type="submit" class="btn btn-primary">Entrar</button>
         </form>

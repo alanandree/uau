@@ -102,6 +102,9 @@
       transition: background 0.2s ease;
     }
     .chat-input button:hover { background: #0056b3; }
+    .banner-dots { display:flex;justify-content:center;gap:8px;margin-top:12px; }
+    .banner-dots .dot { width:8px;height:8px;border-radius:50%;background:#d1d5db;transition:all .3s;cursor:pointer; }
+    .banner-dots .dot.active { width:24px;border-radius:4px;background:#3b82f6; }
   </style>
   <link rel="stylesheet" href="/css/responsive.css">
 </head>
@@ -294,17 +297,17 @@
           <svg width="20" height="20" viewBox="0 0 24 24">
             <path fill="#6b7280" d="M15.5 14h-.79l-.28-.27A6.471 6.471 0 0016 9.5 6.5 6.5 0 109.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zM10 15a5 5 0 110-10 5 5 0 010 10z"/>
           </svg>
-          <input type="search" placeholder="Qual a sua necessidade?">
+          <input type="search" id="searchInput" placeholder="Ex: pedreiro, eletricista, manicure..." onkeypress="if(event.key==='Enter')buscarHome()">
         </div>
-        <button class="btn">Pesquisar</button>
+        <button class="btn" onclick="buscarHome()">Pesquisar</button>
       </div>
 
-      <section class="cta">
+      <section class="cta" id="bannerRotativo">
         <div class="left">
-          <h2>Contrate rápido</h2>
-          <p>✔ Profissionais verificados</p>
+          <h2 id="bannerTitle">Contrate rápido</h2>
+          <p id="bannerText">✔ Profissionais verificados</p>
         </div>
-        <div class="illustration">
+        <div class="illustration" id="bannerIcon">
           <svg width="120" height="120" viewBox="0 0 200 200">
             <circle cx="100" cy="62" r="28" fill="#ffdbb5"/>
             <path d="M70 58 q30 -30 60 0 v10 h-60 z" fill="#f59e0b"/>
@@ -314,6 +317,7 @@
           </svg>
         </div>
       </section>
+      <div class="banner-dots" id="bannerDots"></div>
 
       <nav class="bottom-nav">
         <a href="/" class="active"><span class="nav-icon">🏠</span><span class="nav-label">Home</span></a>
@@ -378,6 +382,37 @@
       chatBox.scrollTop = chatBox.scrollHeight;
     }
 
+    function buscarHome() {
+      var q = document.getElementById('searchInput').value.trim();
+      if (q) window.location.href = '/buscar?q=' + encodeURIComponent(q);
+    }
+
+    // === BANNER ROTATIVO ===
+    var bannerSlides = [
+      { title: 'Contrate rápido', text: '✔ Profissionais verificados', icon: '🔧' },
+      { title: 'Segurança primeiro!', text: 'Nunca faça negociações fora da nossa plataforma', icon: '🛡️' }
+    ];
+    var bannerAtual = 0;
+    (function initBannerDots() {
+      var container = document.getElementById('bannerDots');
+      for (var i = 0; i < bannerSlides.length; i++) {
+        var dot = document.createElement('span');
+        dot.className = 'dot' + (i === 0 ? ' active' : '');
+        dot.onclick = function(j) { return function() { bannerAtual = j; trocarBanner(); }; }(i);
+        container.appendChild(dot);
+      }
+    })();
+    function trocarBanner() {
+      bannerAtual = (bannerAtual + 1) % bannerSlides.length;
+      var s = bannerSlides[bannerAtual];
+      document.getElementById('bannerTitle').textContent = s.title;
+      document.getElementById('bannerText').textContent = s.text;
+      document.getElementById('bannerIcon').innerHTML = '<div style="font-size:60px;line-height:120px;text-align:center">' + s.icon + '</div>';
+      document.querySelectorAll('#bannerDots .dot').forEach(function(d, i) {
+        d.classList.toggle('active', i === bannerAtual);
+      });
+    }
+    setInterval(trocarBanner, 5000);
     // === ENDEREÇO ===
     let enderecoAtual = null;
     let cepTimeout = null;

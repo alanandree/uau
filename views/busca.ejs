@@ -1,0 +1,113 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Busca: <%= query %> - Fixoo</title>
+  <link rel="stylesheet" href="/css/style.css">
+  <style>
+    .colabs-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(280px,1fr)); gap:20px; margin-top:24px; }
+    .colab-card { background:#f3f4f6; border-radius:18px; padding:24px; text-align:center; box-shadow:0 10px 25px rgba(16,24,40,0.06); transition:transform .18s ease,box-shadow .18s ease; }
+    .colab-card:hover { transform:translateY(-6px); box-shadow:0 18px 35px rgba(16,24,40,0.12); }
+    .colab-avatar { width:80px;height:80px;border-radius:50%;object-fit:cover;margin:0 auto 12px;border:3px solid transparent; }
+    .colab-name { font-size:18px;font-weight:700;color:#111827;margin-bottom:4px; }
+    .colab-sub { font-size:14px;color:#6b7280;margin-bottom:8px; }
+    .colab-desc { font-size:13px;color:#4b5563;margin-bottom:12px;line-height:1.4; }
+    .colab-info { font-size:12px;color:#6b7280;display:flex;flex-direction:column;gap:4px; }
+    .colab-info span { display:flex;align-items:center;justify-content:center;gap:4px; }
+    .empty-state { text-align:center;padding:60px 20px;color:#6b7280; }
+    .empty-state h2 { font-size:24px;margin-bottom:8px;color:#111827; }
+    .cat-chips { display:flex;flex-wrap:wrap;gap:8px;margin-top:16px; }
+    .cat-chip { display:inline-block;padding:8px 16px;background:#e6e7ea;border-radius:20px;font-size:13px;font-weight:600;color:#111827;text-decoration:none; }
+    .cat-chip:hover { background:#d1d5db; }
+    .search-again { margin-top:24px;display:flex;gap:10px; }
+    .search-again input { flex:1;padding:12px 16px;border:1px solid #d1d5db;border-radius:12px;font-size:14px; }
+    .search-again button { padding:12px 20px;background:#3b82f6;color:#fff;border:none;border-radius:12px;font-weight:600;cursor:pointer; }
+    .back-link { display:inline-block;margin-top:20px;color:#3b82f6;font-size:14px;font-weight:600;text-decoration:none; }
+    .star-rating { display:flex;justify-content:center;gap:2px;font-size:16px; }
+    .star-filled { color:#f59e0b; }
+    .star-empty { color:#d1d5db; }
+  </style>
+  <link rel="stylesheet" href="/css/responsive.css">
+</head>
+<body>
+  <div class="wrap" style="margin-top:80px">
+    <header>
+      <div class="hero-text">
+        <h1>Resultados para "<%= query %>"</h1>
+        <p><%= colaboradores.length %> profissional(is) encontrado(s)</p>
+      </div>
+      <div class="logo">
+        <a href="/" style="text-decoration:none">
+          <svg width="120" height="120" viewBox="0 0 100 100">
+            <defs><linearGradient id="g" x1="0" x2="1"><stop offset="0" stop-color="#ffffff"/><stop offset="1" stop-color="#2e73dc"/></linearGradient></defs>
+            <rect rx="20" width="100" height="100" fill="url(#g)"></rect>
+            <text x="50" y="57" font-size="30" fill="#fff" font-family="Arial" text-anchor="middle">FIXOO</text>
+          </svg>
+        </a>
+      </div>
+    </header>
+
+    <div class="search-again">
+      <input type="search" id="searchInput" placeholder="Buscar novamente..." value="<%= query %>" onkeypress="if(event.key==='Enter')buscar()">
+      <button onclick="buscar()">Buscar</button>
+    </div>
+
+    <% if (categorias.length > 0) { %>
+      <div class="cat-chips">
+        <% categorias.forEach(function(c) { %>
+          <a href="/categoria/<%= c.slug %>" class="cat-chip"><%= c.nome %></a>
+        <% }); %>
+      </div>
+    <% } %>
+
+    <main>
+      <% if (colaboradores.length > 0) { %>
+        <div class="colabs-grid">
+          <% colaboradores.forEach(function(c) { %>
+            <a href="/colaborador/<%= c.id %>/perfil" style="text-decoration:none;color:inherit;display:block">
+              <div class="colab-card">
+                <img src="<%= c.profile_picture || '/img/default-avatar.svg' %>" alt="<%= c.name %>" class="colab-avatar">
+                <div class="colab-name"><%= c.name %></div>
+                <div class="colab-sub"><%= c.subcategory || c.category %></div>
+                <% if (c.rating && c.rating > 0) { %>
+                  <div class="star-rating">
+                    <% for (var i = 1; i <= 5; i++) { %>
+                      <span class="<%= i <= c.rating ? 'star-filled' : 'star-empty' %>">★</span>
+                    <% } %>
+                    <span style="font-size:13px;color:#6b7280;margin-left:4px"><%= c.rating.toFixed(1) %></span>
+                  </div>
+                <% } %>
+                <% if (c.description) { %><div class="colab-desc"><%= c.description %></div><% } %>
+                <div class="colab-info">
+                  <span>📍 <%= c.city || '' %><%= c.city && c.state ? ', ' : '' %><%= c.state || '' %></span>
+                </div>
+              </div>
+            </a>
+          <% }); %>
+        </div>
+      <% } else { %>
+        <div class="empty-state">
+          <h2>Nenhum resultado encontrado</h2>
+          <p>Tente buscar por: pedreiro, eletricista, cabeleireiro, manicure, faxina...</p>
+          <a href="/" class="back-link">← Voltar ao início</a>
+        </div>
+      <% } %>
+    </main>
+
+    <nav class="bottom-nav">
+      <a href="/" class="active"><span class="nav-icon">🏠</span><span class="nav-label">Home</span></a>
+      <a href="/" onclick="document.getElementById('searchInput').focus();return false"><span class="nav-icon">🔍</span><span class="nav-label">Buscar</span></a>
+      <a href="/perfil"><span class="nav-icon">👤</span><span class="nav-label">Perfil</span></a>
+      <a href="/colaborador/login"><span class="nav-icon">⚙</span><span class="nav-label">Parceiro</span></a>
+    </nav>
+  </div>
+
+  <script>
+    function buscar() {
+      var q = document.getElementById('searchInput').value.trim();
+      if (q) window.location.href = '/buscar?q=' + encodeURIComponent(q);
+    }
+  </script>
+</body>
+</html>

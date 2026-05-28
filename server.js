@@ -25,6 +25,7 @@ app.use((req, res, next) => {
   next();
 });
 
+app.set('trust proxy', 1);
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
@@ -997,50 +998,50 @@ app.post('/esqueci-senha', (req, res) => {
   const { email } = req.body;
   if (!email) return res.render('esqueci-senha', { error: 'Digite seu email.', success: null, email: '' });
 
-  // Check if email exists in usuarios OR colaboradores
-  db.get("SELECT id FROM usuarios WHERE email = ?", [email], (err, user) => {
-    db.get("SELECT id FROM colaboradores WHERE email = ?", [email], (err, colab) => {
-      if (!user && !colab) {
-        return res.render('esqueci-senha', { error: 'Email não encontrado.', success: null, email });
-      }
+  // Always show same message regardless of whether email exists (security best practice)
+  const token = crypto.randomBytes(32).toString('hex');
+  const expiresAt = new Date(Date.now() + 60 * 60 * 1000).toISOString();
+  const baseUrl = req.headers.host ? `${req.protocol}://${req.headers.host}` : `http://localhost:${port}`;
+  const resetLink = `${baseUrl}/resetar-senha/${token}`;
 
-      const token = crypto.randomBytes(32).toString('hex');
-      const expiresAt = new Date(Date.now() + 60 * 60 * 1000).toISOString(); // 1 hour
+  db.run("INSERT INTO password_resets (email, token, expires_at) VALUES (?, ?, ?)", [email, token, expiresAt], (err) => {
+    if (err) {
+      console.error(err);
+      return res.render('esqueci-senha', { error: 'Erro ao gerar link. Tente novamente.', success: null, email });
+    }
 
-      db.run("INSERT INTO password_resets (email, token, expires_at) VALUES (?, ?, ?)", [email, token, expiresAt], (err) => {
-        if (err) {
-          console.error(err);
-          return res.render('esqueci-senha', { error: 'Erro ao gerar link. Tente novamente.', success: null, email });
-        }
+    console.log(`\n=== LINK DE RECUPERACAO (${email}) ===`);
+    console.log(resetLink);
+    console.log('=====================================\n');
 
-        const resetLink = `http://localhost:${port}/resetar-senha/${token}`;
+    const mailOptions = {
+      from: 'fixoosite@gmail.com',
+      to: email,
+      subject: 'Recuperação de Senha - Fixoo',
+      html: `
+        <div style="font-family:Arial,sans-serif;max-width:480px;margin:0 auto">
+          <h2 style="color:#3b82f6">Fixoo - Recuperação de Senha</h2>
+          <p>Você solicitou a redefinição de sua senha.</p>
+          <p>Clique no botão abaixo para criar uma nova senha:</p>
+          <a href="${resetLink}" style="display:inline-block;padding:12px 24px;background:#3b82f6;color:#fff;text-decoration:none;border-radius:8px;font-weight:600;margin:16px 0">Redefinir Senha</a>
+          <p style="color:#6b7280;font-size:13px">Este link expira em 1 hora.</p>
+          <p style="color:#6b7280;font-size:13px">Se você não solicitou esta recuperação, ignore este email.</p>
+          <hr style="border:none;border-top:1px solid #e5e7eb;margin:20px 0">
+          <p style="color:#9ca3af;font-size:12px">Fixoo - Sua plataforma de serviços</p>
+        </div>
+      `
+    };
 
-        const mailOptions = {
-          from: 'fixoosite@gmail.com',
-          to: email,
-          subject: 'Recuperação de Senha - Fixoo',
-          html: `
-            <div style="font-family:Arial,sans-serif;max-width:480px;margin:0 auto">
-              <h2 style="color:#3b82f6">Fixoo - Recuperação de Senha</h2>
-              <p>Você solicitou a redefinição de sua senha.</p>
-              <p>Clique no botão abaixo para criar uma nova senha:</p>
-              <a href="${resetLink}" style="display:inline-block;padding:12px 24px;background:#3b82f6;color:#fff;text-decoration:none;border-radius:8px;font-weight:600;margin:16px 0">Redefinir Senha</a>
-              <p style="color:#6b7280;font-size:13px">Este link expira em 1 hora.</p>
-              <p style="color:#6b7280;font-size:13px">Se você não solicitou esta recuperação, ignore este email.</p>
-              <hr style="border:none;border-top:1px solid #e5e7eb;margin:20px 0">
-              <p style="color:#9ca3af;font-size:12px">Fixoo - Sua plataforma de serviços</p>
-            </div>
-          `
-        };
+    // Don't block — respond immediately
+    res.render('esqueci-senha', {
+      error: null,
+      success: 'Se o email existir, você receberá um link de recuperação em instantes.',
+      email: ''
+    });
 
-        transporter.sendMail(mailOptions, (err) => {
-          if (err) {
-            console.error('Erro ao enviar email:', err);
-            return res.render('esqueci-senha', { error: 'Erro ao enviar email. Tente novamente mais tarde.', success: null, email });
-          }
-          res.render('esqueci-senha', { error: null, success: 'Link de recuperação enviado para seu email!', email: '' });
-        });
-      });
+    // Send email in background (with timeout so it doesn't hang)
+    transporter.sendMail(mailOptions, (err) => {
+      if (err) console.error('Erro ao enviar email (não crítico):', err.message);
     });
   });
 });

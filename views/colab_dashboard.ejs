@@ -117,9 +117,7 @@
                 <input type="file" name="banner" id="banner" accept="image/*">
                 <label for="banner" class="file-label"><%= colab.banner ? 'Alterar Banner' : 'Adicionar Banner' %></label>
               </div>
-              <% if (colab.banner) { %>
-                <img src="<%= colab.banner %>" style="width:100%;max-height:120px;object-fit:cover;border-radius:8px;margin-top:8px">
-              <% } %>
+              <img src="<%= colab.banner || '' %>" id="banner-preview" style="width:100%;max-height:120px;object-fit:cover;border-radius:8px;margin-top:8px;<%= colab.banner ? '' : 'display:none' %>">
             </div>
             <div class="dados-grid">
               <div class="form-group">
@@ -515,6 +513,26 @@
       fetch('/colaborador/servicos/' + id, { method: 'DELETE' })
         .then(function(r) { return r.json(); }).then(function(d) { if (d.success) location.reload(); });
     }
+
+    document.getElementById('profile_picture').addEventListener('change', function() {
+      if (this.files && this.files[0]) {
+        var reader = new FileReader();
+        reader.onload = function(e) { document.getElementById('preview').src = e.target.result; };
+        reader.readAsDataURL(this.files[0]);
+      }
+    });
+
+    document.getElementById('banner').addEventListener('change', function() {
+      if (this.files && this.files[0]) {
+        var reader = new FileReader();
+        reader.onload = function(e) {
+          var img = document.getElementById('banner-preview');
+          img.src = e.target.result;
+          img.style.display = 'block';
+        };
+        reader.readAsDataURL(this.files[0]);
+      }
+    });
   </script>
 </body>
 </html>

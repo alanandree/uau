@@ -324,17 +324,42 @@ app.post('/colaborador/dashboard', isColab, (req, res) => {
       if (err || !colab) return res.redirect('/colaborador/login');
       db.all("SELECT * FROM servicos WHERE colaborador_id = ?", [req.session.colabId], (err, servicos) => {
         let profile_picture = colab.profile_picture;
-        if (req.files && req.files['profile_picture'] && req.files['profile_picture'][0]) profile_picture = '/uploads/' + req.files['profile_picture'][0].filename;
+        let fotoSalva = null;
+        if (req.files && req.files['profile_picture'] && req.files['profile_picture'][0]) {
+          profile_picture = '/uploads/' + req.files['profile_picture'][0].filename;
+          fotoSalva = profile_picture;
+        }
         let banner = colab.banner;
-        if (req.files && req.files['banner'] && req.files['banner'][0]) banner = '/uploads/' + req.files['banner'][0].filename;
+        let bannerSalvo = null;
+        if (req.files && req.files['banner'] && req.files['banner'][0]) {
+          banner = '/uploads/' + req.files['banner'][0].filename;
+          bannerSalvo = banner;
+        }
         db.run(
           `UPDATE colaboradores SET name=?, phone=?, category=?, subcategory=?, description=?, city=?, state=?, address=?, whatsapp=?, instagram=?, profile_picture=?, working_hours=?, banner=? WHERE id=?`,
           [name || colab.name, phone || colab.phone, category || colab.category, subcategory || null, description || null, city || null, state || null, address || null, whatsapp || null, instagram || null, profile_picture, working_hours || null, banner, req.session.colabId],
           (err) => {
+            if (err) console.error('DB UPDATE ERROR:', err);
+            const colabAtualizado = {
+              ...colab,
+              name: name || colab.name,
+              phone: phone || colab.phone,
+              category: category || colab.category,
+              subcategory: subcategory || null,
+              description: description || null,
+              city: city || null,
+              state: state || null,
+              address: address || null,
+              whatsapp: whatsapp || null,
+              instagram: instagram || null,
+              profile_picture,
+              working_hours: working_hours || null,
+              banner
+            };
             res.render('colab_dashboard', {
-              colab: { ...colab, name: name || colab.name, phone: phone || colab.phone, category: category || colab.category, subcategory: subcategory || null, description: description || null, city: city || null, state: state || null, address: address || null, whatsapp: whatsapp || null, instagram: instagram || null, profile_picture, working_hours: working_hours || null, banner },
+              colab: colabAtualizado,
               servicos: servicos || [],
-              success: err ? null : 'Perfil atualizado com sucesso!',
+              success: err ? null : 'Perfil atualizado com sucesso!' + (fotoSalva ? ' Foto: ' + fotoSalva : '') + (bannerSalvo ? ' Banner: ' + bannerSalvo : ''),
               error: err ? 'Erro ao salvar no banco.' : null
             });
           }

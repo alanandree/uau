@@ -263,6 +263,12 @@ app.post('/admin/reprovar/:id', isAdmin, (req, res) => {
   });
 });
 
+app.get('/admin/usuarios', isAdmin, (req, res) => {
+  db.all("SELECT * FROM usuarios ORDER BY id DESC", [], (err, rows) => {
+    res.render('admin_usuarios', { usuarios: rows || [] });
+  });
+});
+
 app.get('/colaborador/login', (req, res) => {
   res.render('colab_login', { error: null });
 });

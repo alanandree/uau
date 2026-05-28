@@ -1,17 +1,17 @@
 /* ===== RESPONSIVE iFOOD-LIKE - Fixoo ===== */
+/* Mantém a mesma paleta de cores do desktop */
 
 /* --- GLOBAL MOBILE RESET --- */
 @media (max-width: 768px) {
   body {
-    background: #fff !important;
+    background: linear-gradient(135deg, #ffffff8a, #3e82ff) !important;
     padding: 0 !important;
     display: block !important;
-    font-family: "Inter", system-ui, -apple-system, "Segoe UI", Roboto, Arial;
   }
   .wrap {
     max-width: 100%;
     margin-top: 56px !important;
-    padding: 0 0 72px 0;
+    padding: 0 0 80px 0;
   }
   .panel {
     padding: 12px 16px 0;
@@ -23,25 +23,23 @@
 
 /* --- FIXED TOPO (iFood-style) --- */
 @media (max-width: 768px) {
-  /* esconde o header original (hero + logo) */
   header {
     display: none !important;
   }
-
-  /* Cria barra fixa no topo via JS ou inline — por enquanto usamos a address-bar */
   .address-bar {
     position: fixed !important;
     top: 0 !important;
     left: 0 !important;
     right: 0 !important;
     z-index: 1000 !important;
-    background: #fff !important;
-    border-bottom: 1px solid #f0f0f0 !important;
+    background: linear-gradient(135deg, #ffffff8a, #e8f0ff) !important;
+    border-bottom: 1px solid #e2e8f0 !important;
     padding: 6px 12px !important;
-    box-shadow: 0 2px 8px rgba(0,0,0,0.04) !important;
+    box-shadow: 0 4px 12px rgba(59, 130, 246, 0.08) !important;
     height: 52px;
     display: flex !important;
     align-items: center !important;
+    backdrop-filter: blur(8px);
   }
   .address-bar-inner {
     display: flex;
@@ -53,7 +51,7 @@
     font-size: 22px !important;
     font-weight: 800 !important;
     letter-spacing: -1px;
-    color: #2563eb !important;
+    color: #3b82f6 !important;
     margin-right: 4px;
     white-space: nowrap;
   }
@@ -66,7 +64,8 @@
     align-items: center;
     gap: 4px;
     padding: 4px 8px;
-    background: #f5f5f5;
+    background: rgba(255,255,255,0.8);
+    border: 1px solid #e2e8f0;
     border-radius: 8px;
     font-size: 12px;
     white-space: nowrap;
@@ -101,6 +100,13 @@
     font-size: 11px !important;
     border-radius: 8px !important;
     white-space: nowrap;
+    background: #3b82f6 !important;
+    color: #fff !important;
+  }
+  .addr-btn-outline {
+    background: transparent !important;
+    color: #3b82f6 !important;
+    border: 1px solid #3b82f6 !important;
   }
 }
 
@@ -112,14 +118,11 @@
   }
   .search {
     width: 100% !important;
-    background: #f5f5f5 !important;
+    background: #f3f4f6 !important;
     border-radius: 12px !important;
     padding: 12px 16px !important;
-    box-shadow: none !important;
-    border: 1px solid #eee;
-  }
-  .search input {
-    font-size: 14px !important;
+    box-shadow: 0 2px 8px rgba(17,24,39,0.04) inset !important;
+    border: 1px solid #e5e7eb;
   }
   .search-wrap .btn {
     display: none !important;
@@ -148,50 +151,47 @@
   .card {
     width: 80px !important;
     height: auto !important;
-    padding: 8px 4px !important;
+    padding: 10px 4px !important;
     margin: 0 4px;
-    background: transparent !important;
-    box-shadow: none !important;
-    border-radius: 12px !important;
+    background: #e6e7ea !important;
+    box-shadow: 0 4px 12px rgba(16,24,40,0.04) !important;
+    border-radius: 16px !important;
     display: flex !important;
     flex-direction: column !important;
     align-items: center !important;
     justify-content: center !important;
-    gap: 4px !important;
-    cursor: pointer;
+    gap: 6px !important;
   }
   .card:hover {
     transform: none !important;
+    box-shadow: 0 6px 16px rgba(16,24,40,0.08) !important;
   }
   .icon {
-    width: 48px !important;
-    height: 48px !important;
-    border-radius: 50% !important;
-    font-size: 20px !important;
+    width: 44px !important;
+    height: 44px !important;
+    border-radius: 12px !important;
+    font-size: 22px !important;
     margin-bottom: 0 !important;
     display: flex !important;
     align-items: center !important;
     justify-content: center !important;
     color: #fff !important;
   }
-  .c-orange .icon { background: linear-gradient(135deg,#f97316,#ea580c) !important; }
-  .c-yellow .icon { background: linear-gradient(135deg,#eab308,#ca8a04) !important; }
-  .c-red .icon { background: linear-gradient(135deg,#ef4444,#dc2626) !important; }
-  .c-blue .icon { background: linear-gradient(135deg,#3b82f6,#2563eb) !important; }
-  .c-green .icon { background: linear-gradient(135deg,#10b981,#059669) !important; }
-  .c-gray .icon { background: linear-gradient(135deg,#6b7280,#4b5563) !important; color: #fff !important; }
+  .c-orange .icon { background: linear-gradient(180deg, #f97316, #fb7b3a) !important; }
+  .c-yellow .icon { background: linear-gradient(180deg, #fbbf24, #f6c34a) !important; color: #111 !important; }
+  .c-red .icon { background: linear-gradient(180deg, #ef4444, #ff6b6b) !important; }
+  .c-blue .icon { background: linear-gradient(180deg, #3b82f6, #4d90ff) !important; }
+  .c-green .icon { background: linear-gradient(180deg, #10b981, #34d399) !important; }
+  .c-gray .icon { background: #6b7280 !important; color: #fff !important; }
 
   .label strong {
-    font-size: 10px !important;
+    font-size: 11px !important;
     text-align: center;
-    color: #374151 !important;
-    font-weight: 500 !important;
+    color: #111827 !important;
+    font-weight: 600 !important;
     line-height: 1.2;
     display: block;
     max-width: 72px;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
   }
   .label br {
     display: none;
@@ -206,12 +206,14 @@
     margin-top: 16px !important;
   }
   .colab-card {
+    background: #f3f4f6 !important;
+    border-radius: 18px !important;
     padding: 16px !important;
-    border-radius: 14px !important;
     display: flex !important;
     align-items: center !important;
     gap: 14px !important;
     text-align: left !important;
+    box-shadow: 0 6px 16px rgba(16,24,40,0.04) !important;
   }
   .colab-card .colab-avatar {
     width: 56px !important;
@@ -246,15 +248,16 @@
     left: 0 !important;
     right: 0 !important;
     z-index: 1000 !important;
-    background: #fff !important;
-    border-top: 1px solid #f0f0f0 !important;
+    background: rgba(255,255,255,0.95) !important;
+    backdrop-filter: blur(8px);
+    border-top: 1px solid #e2e8f0 !important;
     display: flex !important;
     flex-direction: row !important;
     justify-content: space-around !important;
     align-items: center !important;
     padding: 6px 0 env(safe-area-inset-bottom, 6px) 0 !important;
     margin: 0 !important;
-    box-shadow: 0 -2px 10px rgba(0,0,0,0.04);
+    box-shadow: 0 -2px 12px rgba(59, 130, 246, 0.06);
     gap: 0 !important;
   }
   .bottom-nav a {
@@ -267,9 +270,13 @@
     text-decoration: none;
     padding: 4px 12px;
     font-weight: 500;
+    transition: color 0.2s;
   }
   .bottom-nav a.active {
-    color: #2563eb;
+    color: #3b82f6;
+  }
+  .bottom-nav a.active .nav-icon {
+    filter: brightness(1);
   }
   .bottom-nav .nav-icon {
     font-size: 20px;
@@ -280,10 +287,20 @@
   }
 }
 
-/* --- BOTTOM NAV ITENS (injetado via JS, fallback via CSS) --- */
+/* --- CHAT BOT: afastar da bottom nav --- */
 @media (max-width: 768px) {
-  .bottom-nav a:not([href*="logout"]):not([href*="perfil"]) {
-    /* mantém os links originais mas estiliza como icones */
+  #chatButton {
+    bottom: 70px !important;
+    width: 56px !important;
+    height: 56px !important;
+    font-size: 26px !important;
+  }
+  #chatPopup {
+    bottom: 130px !important;
+    right: 12px !important;
+    width: calc(100vw - 24px) !important;
+    height: 60vh !important;
+    max-height: 450px;
   }
 }
 
@@ -335,7 +352,7 @@
     display: flex;
     align-items: center;
     gap: 12px;
-    border-bottom: 1px solid #f0f0f0;
+    border-bottom: 1px solid #e2e8f0;
     background: #fff;
   }
   .avatar-wrapper {
@@ -353,6 +370,7 @@
   .sidebar-user-info p {
     font-size: 12px;
     margin: 2px 0 0;
+    color: #6b7280;
   }
   .sidebar-nav {
     flex-direction: row;
@@ -360,7 +378,7 @@
     overflow-x: auto;
     gap: 0;
     padding: 0 16px;
-    border-bottom: 1px solid #f0f0f0;
+    border-bottom: 1px solid #e2e8f0;
     -webkit-overflow-scrolling: touch;
     scrollbar-width: none;
   }
@@ -373,10 +391,11 @@
     white-space: nowrap;
     border-bottom: 2px solid transparent;
     color: #6b7280;
+    font-weight: 500;
   }
   .sidebar-nav a.active {
-    color: #2563eb;
-    border-bottom-color: #2563eb;
+    color: #3b82f6;
+    border-bottom-color: #3b82f6;
   }
   .profile-content {
     padding: 16px;
@@ -494,26 +513,15 @@
     min-width: 0;
     top: 56px;
     border-radius: 12px;
-  }
-  .address-selector {
-    font-size: 13px;
+    box-shadow: 0 8px 24px rgba(59, 130, 246, 0.12);
   }
 }
 
-/* --- FIXOO BRAND no topo --- */
-@media (max-width: 768px) {
-  a[href="/"] svg,
-  a[href="/"] .logo {
-    display: none !important;
-  }
-}
-
-/* --- chatbot --- */
+/* --- chatbot popup --- */
 @media (max-width: 600px) {
   #chatPopup {
-    width: calc(100vw - 24px);
-    right: 12px;
-    bottom: 12px;
+    right: 12px !important;
+    width: calc(100vw - 24px) !important;
   }
 }
 

@@ -1,4 +1,291 @@
-/* ===== RESPONSIVE - Fixoo ===== */
+/* ===== RESPONSIVE iFOOD-LIKE - Fixoo ===== */
+
+/* --- GLOBAL MOBILE RESET --- */
+@media (max-width: 768px) {
+  body {
+    background: #fff !important;
+    padding: 0 !important;
+    display: block !important;
+    font-family: "Inter", system-ui, -apple-system, "Segoe UI", Roboto, Arial;
+  }
+  .wrap {
+    max-width: 100%;
+    margin-top: 56px !important;
+    padding: 0 0 72px 0;
+  }
+  .panel {
+    padding: 12px 16px 0;
+  }
+  * {
+    -webkit-tap-highlight-color: transparent;
+  }
+}
+
+/* --- FIXED TOPO (iFood-style) --- */
+@media (max-width: 768px) {
+  /* esconde o header original (hero + logo) */
+  header {
+    display: none !important;
+  }
+
+  /* Cria barra fixa no topo via JS ou inline — por enquanto usamos a address-bar */
+  .address-bar {
+    position: fixed !important;
+    top: 0 !important;
+    left: 0 !important;
+    right: 0 !important;
+    z-index: 1000 !important;
+    background: #fff !important;
+    border-bottom: 1px solid #f0f0f0 !important;
+    padding: 6px 12px !important;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.04) !important;
+    height: 52px;
+    display: flex !important;
+    align-items: center !important;
+  }
+  .address-bar-inner {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    width: 100%;
+  }
+  .address-logo {
+    font-size: 22px !important;
+    font-weight: 800 !important;
+    letter-spacing: -1px;
+    color: #2563eb !important;
+    margin-right: 4px;
+    white-space: nowrap;
+  }
+  .address-selector {
+    flex: 1;
+    min-width: 0;
+  }
+  .address-current {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    padding: 4px 8px;
+    background: #f5f5f5;
+    border-radius: 8px;
+    font-size: 12px;
+    white-space: nowrap;
+    overflow: hidden;
+  }
+  .address-current strong {
+    font-size: 12px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    max-width: 120px;
+  }
+  .address-current span {
+    display: none;
+  }
+  .address-icon {
+    font-size: 14px;
+    flex-shrink: 0;
+  }
+  .address-arrow {
+    font-size: 8px;
+    margin-left: auto;
+    flex-shrink: 0;
+  }
+  .address-actions {
+    display: flex;
+    gap: 4px;
+    flex-shrink: 0;
+  }
+  .addr-btn {
+    padding: 6px 10px !important;
+    font-size: 11px !important;
+    border-radius: 8px !important;
+    white-space: nowrap;
+  }
+}
+
+/* --- SEARCH BAR iFOOD-style --- */
+@media (max-width: 768px) {
+  .search-wrap {
+    margin: 0 0 16px 0 !important;
+    display: block !important;
+  }
+  .search {
+    width: 100% !important;
+    background: #f5f5f5 !important;
+    border-radius: 12px !important;
+    padding: 12px 16px !important;
+    box-shadow: none !important;
+    border: 1px solid #eee;
+  }
+  .search input {
+    font-size: 14px !important;
+  }
+  .search-wrap .btn {
+    display: none !important;
+  }
+}
+
+/* --- CATEGORIAS: HORIZONTAL SCROLL (iFood) --- */
+@media (max-width: 768px) {
+  .grid {
+    display: flex !important;
+    flex-direction: row !important;
+    overflow-x: auto !important;
+    gap: 0 !important;
+    padding: 4px 0 12px !important;
+    scroll-snap-type: x mandatory;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+  }
+  .grid::-webkit-scrollbar {
+    display: none;
+  }
+  .grid a {
+    flex: 0 0 auto;
+    scroll-snap-align: start;
+  }
+  .card {
+    width: 80px !important;
+    height: auto !important;
+    padding: 8px 4px !important;
+    margin: 0 4px;
+    background: transparent !important;
+    box-shadow: none !important;
+    border-radius: 12px !important;
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: center !important;
+    justify-content: center !important;
+    gap: 4px !important;
+    cursor: pointer;
+  }
+  .card:hover {
+    transform: none !important;
+  }
+  .icon {
+    width: 48px !important;
+    height: 48px !important;
+    border-radius: 50% !important;
+    font-size: 20px !important;
+    margin-bottom: 0 !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    color: #fff !important;
+  }
+  .c-orange .icon { background: linear-gradient(135deg,#f97316,#ea580c) !important; }
+  .c-yellow .icon { background: linear-gradient(135deg,#eab308,#ca8a04) !important; }
+  .c-red .icon { background: linear-gradient(135deg,#ef4444,#dc2626) !important; }
+  .c-blue .icon { background: linear-gradient(135deg,#3b82f6,#2563eb) !important; }
+  .c-green .icon { background: linear-gradient(135deg,#10b981,#059669) !important; }
+  .c-gray .icon { background: linear-gradient(135deg,#6b7280,#4b5563) !important; color: #fff !important; }
+
+  .label strong {
+    font-size: 10px !important;
+    text-align: center;
+    color: #374151 !important;
+    font-weight: 500 !important;
+    line-height: 1.2;
+    display: block;
+    max-width: 72px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+  .label br {
+    display: none;
+  }
+}
+
+/* --- CATEGORIA PAGE (colabs grid) --- */
+@media (max-width: 768px) {
+  .colabs-grid {
+    grid-template-columns: 1fr !important;
+    gap: 12px !important;
+    margin-top: 16px !important;
+  }
+  .colab-card {
+    padding: 16px !important;
+    border-radius: 14px !important;
+    display: flex !important;
+    align-items: center !important;
+    gap: 14px !important;
+    text-align: left !important;
+  }
+  .colab-card .colab-avatar {
+    width: 56px !important;
+    height: 56px !important;
+    margin: 0 !important;
+    flex-shrink: 0;
+  }
+}
+
+/* --- HERO TEXT: hide on mobile --- */
+@media (max-width: 768px) {
+  .hero-text {
+    display: none !important;
+  }
+  .logo {
+    display: none !important;
+  }
+}
+
+/* --- CTA: esconde no mobile  --- */
+@media (max-width: 768px) {
+  .cta {
+    display: none !important;
+  }
+}
+
+/* --- BOTTOM NAV (iFood-style) --- */
+@media (max-width: 768px) {
+  .bottom-nav {
+    position: fixed !important;
+    bottom: 0 !important;
+    left: 0 !important;
+    right: 0 !important;
+    z-index: 1000 !important;
+    background: #fff !important;
+    border-top: 1px solid #f0f0f0 !important;
+    display: flex !important;
+    flex-direction: row !important;
+    justify-content: space-around !important;
+    align-items: center !important;
+    padding: 6px 0 env(safe-area-inset-bottom, 6px) 0 !important;
+    margin: 0 !important;
+    box-shadow: 0 -2px 10px rgba(0,0,0,0.04);
+    gap: 0 !important;
+  }
+  .bottom-nav a {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 2px;
+    font-size: 10px;
+    color: #9ca3af;
+    text-decoration: none;
+    padding: 4px 12px;
+    font-weight: 500;
+  }
+  .bottom-nav a.active {
+    color: #2563eb;
+  }
+  .bottom-nav .nav-icon {
+    font-size: 20px;
+    line-height: 1;
+  }
+  .bottom-nav .nav-label {
+    font-size: 10px;
+  }
+}
+
+/* --- BOTTOM NAV ITENS (injetado via JS, fallback via CSS) --- */
+@media (max-width: 768px) {
+  .bottom-nav a:not([href*="logout"]):not([href*="perfil"]) {
+    /* mantém os links originais mas estiliza como icones */
+  }
+}
 
 /* --- auth.css pages (login, register, admin, perfil) --- */
 @media (max-width: 768px) {
@@ -16,84 +303,6 @@
   .brand-name {
     font-size: 60px;
     letter-spacing: 6px;
-  }
-}
-
-/* --- style.css (home, categoria) --- */
-@media (max-width: 768px) {
-  header {
-    flex-direction: column;
-    gap: 16px;
-  }
-  .hero-text h1 {
-    font-size: 32px;
-  }
-  .logo {
-    width: 140px;
-  }
-  .grid {
-    grid-template-columns: repeat(2, 1fr);
-    gap: 12px;
-  }
-  .card {
-    height: 120px;
-    padding: 20px 12px;
-  }
-  .icon {
-    width: 40px;
-    height: 40px;
-    font-size: 20px;
-  }
-  .label strong {
-    font-size: 13px;
-  }
-  .search-wrap {
-    flex-direction: column;
-    gap: 12px;
-  }
-  .search {
-    width: 100%;
-  }
-  .cta {
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 16px;
-    padding: 20px;
-  }
-  .cta h2 {
-    font-size: 22px;
-  }
-  .bottom-nav {
-    flex-direction: column;
-    gap: 10px;
-  }
-  body {
-    padding: 16px 12px;
-  }
-}
-
-@media (max-width: 480px) {
-  .grid {
-    grid-template-columns: 1fr;
-  }
-  .hero-text h1 {
-    font-size: 26px;
-  }
-  .card {
-    height: 100px;
-    flex-direction: row;
-    gap: 16px;
-    padding: 12px 16px;
-  }
-  .icon {
-    margin-bottom: 0;
-  }
-}
-
-/* --- categoria.ejs --- */
-@media (max-width: 768px) {
-  .colabs-grid {
-    grid-template-columns: 1fr;
   }
 }
 
@@ -116,29 +325,61 @@
 @media (max-width: 768px) {
   .profile-container {
     flex-direction: column;
-    padding-top: 50px;
+    padding-top: 60px;
   }
   .profile-sidebar {
     width: 100%;
     height: auto;
     position: static;
     padding: 20px 16px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    border-bottom: 1px solid #f0f0f0;
+    background: #fff;
   }
   .avatar-wrapper {
-    width: 80px;
-    height: 80px;
+    width: 56px;
+    height: 56px;
+    margin: 0;
+  }
+  .sidebar-user-info {
+    flex: 1;
+  }
+  .sidebar-user-info h2 {
+    font-size: 16px;
+    margin: 0;
+  }
+  .sidebar-user-info p {
+    font-size: 12px;
+    margin: 2px 0 0;
   }
   .sidebar-nav {
     flex-direction: row;
-    flex-wrap: wrap;
-    gap: 4px;
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    gap: 0;
+    padding: 0 16px;
+    border-bottom: 1px solid #f0f0f0;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+  }
+  .sidebar-nav::-webkit-scrollbar {
+    display: none;
   }
   .sidebar-nav a {
-    font-size: 12px;
-    padding: 6px 10px;
+    font-size: 13px;
+    padding: 12px 16px;
+    white-space: nowrap;
+    border-bottom: 2px solid transparent;
+    color: #6b7280;
+  }
+  .sidebar-nav a.active {
+    color: #2563eb;
+    border-bottom-color: #2563eb;
   }
   .profile-content {
-    padding: 20px 16px;
+    padding: 16px;
   }
   .item-card {
     flex-direction: column;
@@ -147,14 +388,6 @@
   }
   .profile-form {
     max-width: 100%;
-  }
-  #chat-pedidos-lista + div {
-    flex-direction: column;
-  }
-  #chat-pedidos-lista + div > div:first-child {
-    max-width: 100%;
-    border-right: none;
-    padding-right: 0;
   }
 }
 
@@ -181,7 +414,7 @@
   }
 }
 
-/* --- colaborador.css --- */
+/* --- colaborador cadastro --- */
 @media (max-width: 600px) {
   .form-card {
     padding: 20px 14px;
@@ -207,7 +440,7 @@
   }
 }
 
-/* --- colab_dashboard inline overrides --- */
+/* --- colab_dashboard --- */
 @media (max-width: 768px) {
   .chat-layout {
     flex-direction: column;
@@ -224,10 +457,17 @@
   }
   .tabs {
     flex-wrap: wrap;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+  }
+  .tabs::-webkit-scrollbar {
+    display: none;
   }
   .tab-btn {
     padding: 10px 14px;
     font-size: 13px;
+    white-space: nowrap;
   }
 }
 
@@ -249,32 +489,31 @@
 
 /* --- address.css improvements --- */
 @media (max-width: 600px) {
-  .address-bar {
-    padding: 8px 12px;
-  }
   .address-dropdown {
     width: calc(100vw - 24px);
     min-width: 0;
+    top: 56px;
+    border-radius: 12px;
   }
   .address-selector {
     font-size: 13px;
   }
 }
 
-/* --- index chatbot --- */
+/* --- FIXOO BRAND no topo --- */
+@media (max-width: 768px) {
+  a[href="/"] svg,
+  a[href="/"] .logo {
+    display: none !important;
+  }
+}
+
+/* --- chatbot --- */
 @media (max-width: 600px) {
   #chatPopup {
     width: calc(100vw - 24px);
     right: 12px;
     bottom: 12px;
-  }
-}
-
-/* --- img default avatar fix --- */
-@media (max-width: 480px) {
-  .avatar-preview {
-    width: 70px;
-    height: 70px;
   }
 }
 
@@ -285,5 +524,15 @@
   }
   .detalhes {
     padding: 16px;
+  }
+}
+
+/* --- dashboard.ejs (user profile dashboard) --- */
+@media (max-width: 768px) {
+  .split-container {
+    flex-direction: column;
+  }
+  .left-side {
+    padding: 20px 16px !important;
   }
 }

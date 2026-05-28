@@ -313,13 +313,13 @@ app.get('/colaborador/dashboard', isColab, (req, res) => {
   });
 });
 
-app.post('/colaborador/dashboard', isColab, (req, res, next) => {
-  uploadColab.fields([{ name: 'profile_picture', maxCount: 1 }, { name: 'banner', maxCount: 1 }])(req, res, function(err) {
-    if (err) {
-      if (err.code === 'LIMIT_FILE_SIZE') return res.render('colab_dashboard', { colab: req.colab || {}, servicos: req.servicos || [], success: null, error: 'Arquivo muito grande. Maximo 5MB.' });
-      return res.render('colab_dashboard', { colab: req.colab || {}, servicos: req.servicos || [], success: null, error: err.message || 'Erro ao fazer upload.' });
+app.post('/colaborador/dashboard', isColab, (req, res) => {
+  uploadColab.fields([{ name: 'profile_picture', maxCount: 1 }, { name: 'banner', maxCount: 1 }])(req, res, function(uploadErr) {
+    if (uploadErr) {
+      console.error('MULTER ERROR:', uploadErr);
+      return res.render('colab_dashboard', { colab: {}, servicos: [], success: null, error: 'Upload: ' + uploadErr.message });
     }
-    const { name, phone, category, subcategory, description, city, state, address, whatsapp, instagram, working_hours } = req.body;
+    const { name, phone, category, subcategory, description, city, state, address, whatsapp, instagram, working_hours } = req.body || {};
     db.get("SELECT * FROM colaboradores WHERE id = ?", [req.session.colabId], (err, colab) => {
       if (err || !colab) return res.redirect('/colaborador/login');
       db.all("SELECT * FROM servicos WHERE colaborador_id = ?", [req.session.colabId], (err, servicos) => {

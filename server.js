@@ -504,6 +504,22 @@ app.post('/api/pedido/:id/concluir-colab', isColab, (req, res) => {
   });
 });
 
+app.get('/api/cliente/:id/perfil', isColab, (req, res) => {
+  db.get("SELECT id, name, email, phone, profile_picture, createdAt, cliente_rating, cliente_total_avaliacoes FROM usuarios WHERE id = ?",
+    [req.params.id],
+    (err, user) => {
+      if (err || !user) return res.status(404).json({ error: 'Cliente nao encontrado.' });
+      db.get("SELECT COUNT(*) as total_pedidos FROM pedidos WHERE user_id = ? AND colaborador_id = ?",
+        [req.params.id, req.session.colabId],
+        (err, row) => {
+          if (!row || row.total_pedidos === 0) return res.status(403).json({ error: 'Sem vinculo com este cliente.' });
+          res.json(user);
+        }
+      );
+    }
+  );
+});
+
 app.post('/api/avaliar/cliente', isColab, (req, res) => {
   const { pedido_id, cliente_id, nota } = req.body;
   if (!pedido_id || !cliente_id || !nota || nota < 1 || nota > 5) return res.status(400).json({ error: 'Dados inválidos.' });

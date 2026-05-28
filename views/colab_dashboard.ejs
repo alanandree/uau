@@ -252,6 +252,17 @@
             <button onclick="document.getElementById('modal-avaliar').style.display='none'" style="margin-top:12px;padding:8px 20px;background:#e5e7eb;border:none;border-radius:8px;cursor:pointer;font-size:13px">Cancelar</button>
           </div>
         </div>
+        <div id="modal-perfil-cliente" style="display:none;position:fixed;inset:0;z-index:999;background:rgba(0,0,0,0.5);align-items:center;justify-content:center">
+          <div style="background:#fff;border-radius:16px;padding:32px;max-width:360px;width:90%;text-align:center">
+            <img id="perfil-cliente-foto" src="" alt="" style="width:80px;height:80px;border-radius:50%;object-fit:cover;border:3px solid #e2e8f0;margin-bottom:12px">
+            <p id="perfil-cliente-nome" style="font-size:18px;font-weight:700;color:#111827;margin-bottom:4px"></p>
+            <p id="perfil-cliente-email" style="font-size:13px;color:#6b7280;margin-bottom:4px"></p>
+            <p id="perfil-cliente-phone" style="font-size:13px;color:#6b7280;margin-bottom:12px"></p>
+            <div id="perfil-cliente-rating" style="font-size:14px;color:#6b7280;margin-bottom:4px"></div>
+            <p id="perfil-cliente-membro" style="font-size:12px;color:#9ca3af;margin-bottom:20px"></p>
+            <button onclick="document.getElementById('modal-perfil-cliente').style.display='none'" style="padding:8px 20px;background:#e5e7eb;border:none;border-radius:8px;cursor:pointer;font-size:13px">Fechar</button>
+          </div>
+        </div>
       </div>
 
       <div class="tab-content" id="tab-chat">
@@ -312,7 +323,7 @@
           return '<div class="pedido-card" data-pedido-id="' + p.id + '" data-user-id="' + p.user_id + '">' +
             '<div class="topo-card">' +
               '<div>' +
-                '<div class="cliente-nome">' + (p.cliente_nome || 'Cliente') + '</div>' +
+                '<div class="cliente-nome" style="cursor:pointer;color:#3b82f6" onclick="verPerfilCliente(' + p.user_id + ')">' + (p.cliente_nome || 'Cliente') + '</div>' +
                 '<div class="cliente-phone">📞 ' + (p.cliente_phone || '') + ' | ' + stars + '</div>' +
                 '<div class="servicos-info">Serviço(s): ' + snames + '</div>' +
                 '<div class="total-valor">R$ ' + (p.total ? Number(p.total).toFixed(2).replace('.', ',') : '0,00') + '</div>' +
@@ -368,6 +379,47 @@
       var pedidoId = parseInt(div.getAttribute('data-pedido'));
       var userId = parseInt(div.getAttribute('data-cliente'));
       div.style.display = 'none';
+      fetch('/api/avaliar/cliente', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        credentials: 'same-origin',
+        body: JSON.stringify({ pedido_id: pedidoId, cliente_id: userId, nota: nota })
+      }).then(function(r) {
+        if (!r.ok) throw new Error('Erro ' + r.status);
+        return r.json();
+      }).then(function(d) {
+        if (d.success) { alert('Cliente avaliado!'); loadPedidos(); }
+      }).catch(function(err) {
+        alert('Erro ao avaliar: ' + err.message);
+      });
+    }
+
+    function verPerfilCliente(userId) {
+      var modal = document.getElementById('modal-perfil-cliente');
+      document.getElementById('perfil-cliente-nome').textContent = 'Carregando...';
+      modal.style.display = 'flex';
+      fetch('/api/cliente/' + userId + '/perfil', { credentials: 'same-origin' }).then(function(r) {
+        if (!r.ok) throw new Error('Nao encontrado');
+        return r.json();
+      }).then(function(u) {
+        document.getElementById('perfil-cliente-foto').src = u.profile_picture || '/img/default-avatar.svg';
+        document.getElementById('perfil-cliente-nome').textContent = u.name;
+        document.getElementById('perfil-cliente-email').textContent = u.email;
+        document.getElementById('perfil-cliente-phone').textContent = u.phone ? '📞 ' + u.phone : '';
+        var ratingHtml = '';
+        if (u.cliente_total_avaliacoes > 0) {
+          var r = Math.round(u.cliente_rating);
+          for (var i = 1; i <= 5; i++) { ratingHtml += '<span style="color:' + (i <= r ? '#f59e0b' : '#d1d5db') + ';font-size:20px">★</span>'; }
+          ratingHtml += ' <span style="font-size:13px">' + u.cliente_rating.toFixed(1) + ' (' + u.cliente_total_avaliacoes + ' avaliações)</span>';
+        } else {
+          ratingHtml = '<span style="color:#9ca3af">Nenhuma avaliação ainda</span>';
+        }
+        document.getElementById('perfil-cliente-rating').innerHTML = ratingHtml;
+        document.getElementById('perfil-cliente-membro').textContent = 'Membro desde ' + new Date(u.createdAt).toLocaleDateString('pt-BR');
+      }).catch(function() {
+        document.getElementById('perfil-cliente-nome').textContent = 'Erro ao carregar perfil.';
+      });
+    }
       fetch('/api/avaliar/cliente', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },

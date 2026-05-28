@@ -1,0 +1,289 @@
+/* ===== RESPONSIVE - Fixoo ===== */
+
+/* --- auth.css pages (login, register, admin, perfil) --- */
+@media (max-width: 768px) {
+  .split-container {
+    flex-direction: column;
+    height: auto;
+    min-height: 100vh;
+  }
+  .right-side {
+    display: none;
+  }
+  .left-side {
+    padding: 32px 20px;
+  }
+  .brand-name {
+    font-size: 60px;
+    letter-spacing: 6px;
+  }
+}
+
+/* --- style.css (home, categoria) --- */
+@media (max-width: 768px) {
+  header {
+    flex-direction: column;
+    gap: 16px;
+  }
+  .hero-text h1 {
+    font-size: 32px;
+  }
+  .logo {
+    width: 140px;
+  }
+  .grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 12px;
+  }
+  .card {
+    height: 120px;
+    padding: 20px 12px;
+  }
+  .icon {
+    width: 40px;
+    height: 40px;
+    font-size: 20px;
+  }
+  .label strong {
+    font-size: 13px;
+  }
+  .search-wrap {
+    flex-direction: column;
+    gap: 12px;
+  }
+  .search {
+    width: 100%;
+  }
+  .cta {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 16px;
+    padding: 20px;
+  }
+  .cta h2 {
+    font-size: 22px;
+  }
+  .bottom-nav {
+    flex-direction: column;
+    gap: 10px;
+  }
+  body {
+    padding: 16px 12px;
+  }
+}
+
+@media (max-width: 480px) {
+  .grid {
+    grid-template-columns: 1fr;
+  }
+  .hero-text h1 {
+    font-size: 26px;
+  }
+  .card {
+    height: 100px;
+    flex-direction: row;
+    gap: 16px;
+    padding: 12px 16px;
+  }
+  .icon {
+    margin-bottom: 0;
+  }
+}
+
+/* --- categoria.ejs --- */
+@media (max-width: 768px) {
+  .colabs-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* --- admin tables --- */
+@media (max-width: 768px) {
+  .admin-table {
+    font-size: 12px;
+  }
+  .admin-table th,
+  .admin-table td {
+    padding: 6px 4px;
+    font-size: 11px;
+  }
+  .form-wrapper {
+    max-width: 100%;
+  }
+}
+
+/* --- perfil.css --- */
+@media (max-width: 768px) {
+  .profile-container {
+    flex-direction: column;
+    padding-top: 50px;
+  }
+  .profile-sidebar {
+    width: 100%;
+    height: auto;
+    position: static;
+    padding: 20px 16px;
+  }
+  .avatar-wrapper {
+    width: 80px;
+    height: 80px;
+  }
+  .sidebar-nav {
+    flex-direction: row;
+    flex-wrap: wrap;
+    gap: 4px;
+  }
+  .sidebar-nav a {
+    font-size: 12px;
+    padding: 6px 10px;
+  }
+  .profile-content {
+    padding: 20px 16px;
+  }
+  .item-card {
+    flex-direction: column;
+    gap: 8px;
+    align-items: flex-start;
+  }
+  .profile-form {
+    max-width: 100%;
+  }
+  #chat-pedidos-lista + div {
+    flex-direction: column;
+  }
+  #chat-pedidos-lista + div > div:first-child {
+    max-width: 100%;
+    border-right: none;
+    padding-right: 0;
+  }
+}
+
+/* --- pagamento.css --- */
+@media (max-width: 600px) {
+  .container {
+    padding: 20px 16px;
+  }
+  h1 {
+    font-size: 1.4rem;
+  }
+  .pix-qr {
+    width: 140px;
+    height: 140px;
+  }
+  .pix-codigo {
+    font-size: 12px;
+    padding: 6px 10px;
+  }
+  .btn-copiar {
+    margin-left: 0;
+    margin-top: 8px;
+    display: block;
+  }
+}
+
+/* --- colaborador.css --- */
+@media (max-width: 600px) {
+  .form-card {
+    padding: 20px 14px;
+  }
+  fieldset {
+    padding: 16px;
+  }
+  .form-row {
+    flex-direction: column;
+    gap: 0;
+  }
+  .topo {
+    padding: 10px 16px;
+  }
+  .topo nav a {
+    font-size: 12px;
+  }
+  .container {
+    padding: 16px 12px 40px;
+  }
+  .dados-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* --- colab_dashboard inline overrides --- */
+@media (max-width: 768px) {
+  .chat-layout {
+    flex-direction: column;
+  }
+  .chat-sidebar {
+    width: 100%;
+    border-right: none;
+    padding-right: 0;
+    max-height: 200px;
+    overflow-y: auto;
+  }
+  .pedido-card .topo-card {
+    flex-direction: column;
+  }
+  .tabs {
+    flex-wrap: wrap;
+  }
+  .tab-btn {
+    padding: 10px 14px;
+    font-size: 13px;
+  }
+}
+
+/* --- barbeiro.css (colaborador_perfil) --- */
+@media (max-width: 768px) {
+  .header {
+    flex-direction: column;
+    text-align: center;
+  }
+  .servicos li {
+    flex-direction: column;
+    gap: 4px;
+  }
+  .servicos label {
+    flex-direction: column;
+    gap: 4px;
+  }
+}
+
+/* --- address.css improvements --- */
+@media (max-width: 600px) {
+  .address-bar {
+    padding: 8px 12px;
+  }
+  .address-dropdown {
+    width: calc(100vw - 24px);
+    min-width: 0;
+  }
+  .address-selector {
+    font-size: 13px;
+  }
+}
+
+/* --- index chatbot --- */
+@media (max-width: 600px) {
+  #chatPopup {
+    width: calc(100vw - 24px);
+    right: 12px;
+    bottom: 12px;
+  }
+}
+
+/* --- img default avatar fix --- */
+@media (max-width: 480px) {
+  .avatar-preview {
+    width: 70px;
+    height: 70px;
+  }
+}
+
+/* --- confirmacao --- */
+@media (max-width: 600px) {
+  .check {
+    font-size: 48px;
+  }
+  .detalhes {
+    padding: 16px;
+  }
+}

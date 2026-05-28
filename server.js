@@ -1014,34 +1014,11 @@ app.post('/esqueci-senha', (req, res) => {
     console.log(resetLink);
     console.log('=====================================\n');
 
-    const mailOptions = {
-      from: 'fixoosite@gmail.com',
-      to: email,
-      subject: 'Recuperação de Senha - Fixoo',
-      html: `
-        <div style="font-family:Arial,sans-serif;max-width:480px;margin:0 auto">
-          <h2 style="color:#3b82f6">Fixoo - Recuperação de Senha</h2>
-          <p>Você solicitou a redefinição de sua senha.</p>
-          <p>Clique no botão abaixo para criar uma nova senha:</p>
-          <a href="${resetLink}" style="display:inline-block;padding:12px 24px;background:#3b82f6;color:#fff;text-decoration:none;border-radius:8px;font-weight:600;margin:16px 0">Redefinir Senha</a>
-          <p style="color:#6b7280;font-size:13px">Este link expira em 1 hora.</p>
-          <p style="color:#6b7280;font-size:13px">Se você não solicitou esta recuperação, ignore este email.</p>
-          <hr style="border:none;border-top:1px solid #e5e7eb;margin:20px 0">
-          <p style="color:#9ca3af;font-size:12px">Fixoo - Sua plataforma de serviços</p>
-        </div>
-      `
-    };
-
-    // Don't block — respond immediately
+    // Respond immediately with the link
     res.render('esqueci-senha', {
       error: null,
-      success: 'Se o email existir, você receberá um link de recuperação em instantes.',
+      success: `Link de recuperação gerado! <a href="${resetLink}" style="color:#16a34a;font-weight:700">Clique aqui para redefinir sua senha</a>`,
       email: ''
-    });
-
-    // Send email in background (with timeout so it doesn't hang)
-    transporter.sendMail(mailOptions, (err) => {
-      if (err) console.error('Erro ao enviar email (não crítico):', err.message);
     });
   });
 });

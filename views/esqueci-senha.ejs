@@ -6,6 +6,9 @@
   <title>Recuperar Senha - Fixoo</title>
   <link rel="stylesheet" href="/css/auth.css">
   <link rel="stylesheet" href="/css/responsive.css">
+  <style>
+    .alert-success a { color:#16a34a; font-weight:700; text-decoration:underline; display:inline-block; margin-top:8px; }
+  </style>
 </head>
 <body>
   <div class="split-container">
@@ -18,7 +21,7 @@
           <div class="alert alert-error"><%= error %></div>
         <% } %>
         <% if (success) { %>
-          <div class="alert alert-success"><%= success %></div>
+          <div class="alert alert-success"><%- success %></div>
         <% } %>
 
         <form action="/esqueci-senha" method="POST">

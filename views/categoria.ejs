@@ -15,8 +15,6 @@
     .colab-desc { font-size:13px;color:#4b5563;margin-bottom:12px;line-height:1.4; }
     .colab-info { font-size:12px;color:#6b7280;display:flex;flex-direction:column;gap:4px; }
     .colab-info span { display:flex;align-items:center;justify-content:center;gap:4px; }
-    .colab-whatsapp { display:inline-block;margin-top:10px;padding:8px 20px;background:#25d366;color:#fff;border-radius:20px;font-size:13px;font-weight:600;text-decoration:none; }
-    .colab-whatsapp:hover { opacity:0.9; }
     .empty-state { text-align:center;padding:60px 20px;color:#6b7280; }
     .empty-state h2 { font-size:24px;margin-bottom:8px;color:#111827; }
     .back-link { display:inline-block;margin-top:20px;color:#3b82f6;font-size:14px;font-weight:600;text-decoration:none; }
@@ -66,10 +64,6 @@
                   <span>📍 <%= c.city || '' %><%= c.city && c.state ? ', ' : '' %><%= c.state || '' %></span>
                   <% if (c.working_hours) { %><span>🕒 <%= c.working_hours %></span><% } %>
                 </div>
-                <% if (c.whatsapp) { %>
-                  <% var wpp = c.whatsapp.replace(/\D/g,'') %>
-                  <a href="https://wa.me/55<%= wpp %>" target="_blank" class="colab-whatsapp">Falar no WhatsApp</a>
-                <% } %>
               </div>
             </a>
           <% }); %>

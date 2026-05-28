@@ -1,0 +1,812 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Fixoo - Serviços</title>
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+  <link rel="stylesheet" href="/css/style.css">
+  <link rel="stylesheet" href="/css/address.css">
+  <style>
+    #chatButton {
+      position: fixed;
+      bottom: 20px;
+      right: 20px;
+      background: #007bff;
+      color: white;
+      width: 65px;
+      height: 65px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 32px;
+      cursor: pointer;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+      z-index: 9999;
+      border: none;
+    }
+    #chatPopup {
+      position: fixed;
+      bottom: 100px;
+      right: 20px;
+      width: 400px;
+      height: 550px;
+      display: none;
+      flex-direction: column;
+      z-index: 9998;
+    }
+    .chat-container {
+      width: 100%;
+      height: 100%;
+      background: white;
+      border-radius: 10px;
+      box-shadow: 0 0 10px rgba(0,0,0,0.2);
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+      font-family: Arial, sans-serif;
+    }
+    .chat-header {
+      display: flex;
+      align-items: center;
+      padding: 10px 15px;
+      background: #007bff;
+      color: white;
+      font-weight: bold;
+      font-size: 18px;
+      border-top-left-radius: 10px;
+      border-top-right-radius: 10px;
+    }
+    .chat-emoji { margin-right: 10px; font-size: 24px; }
+    .chat-box {
+      flex: 1;
+      padding: 15px;
+      overflow-y: auto;
+      scroll-behavior: smooth;
+      background: #f1f1f1;
+      display: flex;
+      flex-direction: column;
+    }
+    .message {
+      margin: 8px 0;
+      padding: 10px 14px;
+      border-radius: 10px;
+      max-width: 85%;
+      font-size: 15px;
+      line-height: 1.5;
+      white-space: pre-wrap;
+      word-break: break-word;
+      overflow-wrap: break-word;
+      box-sizing: border-box;
+    }
+    .user { background: #d1e7dd; align-self: flex-end; }
+    .bot { background: #f8d7da; align-self: flex-start; }
+    .chat-input {
+      display: flex;
+      border-top: 1px solid #ccc;
+    }
+    .chat-input input {
+      flex: 1;
+      padding: 10px;
+      border: none;
+      outline: none;
+      font-size: 15px;
+    }
+    .chat-input button {
+      background: #007bff;
+      color: white;
+      border: none;
+      padding: 10px 15px;
+      cursor: pointer;
+      transition: background 0.2s ease;
+    }
+    .chat-input button:hover { background: #0056b3; }
+  </style>
+</head>
+<body>
+
+  <!-- BARRA DE ENDEREÇO FIXA NO TOPO -->
+  <div class="address-bar" id="addressBar">
+    <div class="address-bar-inner">
+      <a href="/" class="address-logo">FIXOO</a>
+
+      <div class="address-selector" id="addressSelector">
+        <div class="address-current" onclick="toggleAddressDropdown()">
+          <span class="address-icon">📍</span>
+          <div class="address-current-text">
+            <strong id="addrLabel"><%= user ? (user.enderecoAtual ? user.enderecoAtual.label : 'Endereço para o serviço') : 'Endereço para o serviço' %></strong>
+            <span id="addrDescription"><%= user && user.enderecoAtual ? user.enderecoAtual.logradouro + ', ' + user.enderecoAtual.bairro : 'Digite seu CEP ou endereço' %></span>
+          </div>
+          <span class="address-arrow">▼</span>
+        </div>
+
+        <div class="address-dropdown" id="addressDropdown">
+          <div class="address-dropdown-header">
+            <h3>Escolher endereço</h3>
+            <button onclick="toggleAddressDropdown()" class="address-close">✕</button>
+          </div>
+
+          <!-- ENDEREÇOS SALVOS -->
+          <div class="address-saved" id="addressSaved">
+            <p class="address-section-title">Endereços salvos</p>
+            <div id="savedAddressesList">
+              <% if (user && user.addresses && user.addresses.length > 0) { %>
+                <% user.addresses.forEach(function(addr) { %>
+                  <div class="saved-address-item" onclick="selectAddress(<%= addr.id %>)">
+                    <span class="saved-addr-icon"><%= addr.label === 'Casa' ? '🏠' : addr.label === 'Trabalho' ? '💼' : '📍' %></span>
+                    <div class="saved-addr-info">
+                      <strong><%= addr.label %></strong>
+                      <span><%= addr.logradouro %><%= addr.numero ? ', ' + addr.numero : '' %> - <%= addr.bairro %>, <%= addr.cidade %> <%= addr.cep %></span>
+                    </div>
+                    <button class="saved-addr-delete" onclick="event.stopPropagation(); deleteAddress(<%= addr.id %>)" title="Excluir">🗑</button>
+                  </div>
+                <% }); %>
+              <% } else { %>
+                <p class="empty-addrs">Nenhum endereço salvo ainda.</p>
+              <% } %>
+            </div>
+          </div>
+
+          <div class="address-divider"></div>
+
+          <!-- BUSCAR NOVO ENDEREÇO -->
+          <div class="address-search-section">
+            <p class="address-section-title">Buscar endereço</p>
+            <div class="address-search-tabs">
+              <button class="addr-tab active" onclick="switchAddrTab('texto', this)">Endereço</button>
+              <button class="addr-tab" onclick="switchAddrTab('mapa', this)">Mapa</button>
+            </div>
+
+            <!-- ABA TEXTO (com busca por texto + CEP) -->
+            <div class="addr-tab-content active" id="tab-texto">
+              <div class="cep-input-group">
+                <input type="text" id="textoCepInput" placeholder="Buscar por CEP" maxlength="9" oninput="buscarTextoCEP(this.value)" onkeypress="if(event.key==='Enter')buscarTextoCEP(this.value)">
+                <button onclick="buscarTextoCEP(document.getElementById('textoCepInput').value)" class="btn-cep-buscar">CEP</button>
+              </div>
+              <div style="text-align:center;font-size:12px;color:#9ca3af;margin:4px 0 8px">ou digite o endereço</div>
+              <div class="cep-input-group">
+                <input type="text" id="textoEndereco" placeholder="Ex: Rua Augusta, 1500 - São Paulo" oninput="buscarEnderecoPorTexto(this.value)">
+                <button onclick="buscarEnderecoPorTexto(document.getElementById('textoEndereco').value)" class="btn-cep-buscar">Buscar</button>
+              </div>
+              <div id="textoSuggestions" class="cep-suggestions"></div>
+              <div id="textoResult" class="cep-result" style="display:none">
+                <div class="cep-result-fields">
+                  <input type="text" id="textoLogradouro" placeholder="Logradouro" readonly>
+                  <input type="text" id="textoBairro" placeholder="Bairro" readonly>
+                  <input type="text" id="textoCidade" placeholder="Cidade" readonly>
+                  <input type="text" id="textoEstado" placeholder="Estado" readonly>
+                  <input type="text" id="textoNumero" placeholder="Número" oninput="atualizarTextoCompleto()">
+                  <input type="text" id="textoComplemento" placeholder="Complemento (opcional)" oninput="atualizarTextoCompleto()">
+                </div>
+                <div class="cep-result-save">
+                  <input type="text" id="textoLabelInput" placeholder="Ex: Casa, Trabalho" maxlength="20">
+                  <button onclick="salvarEnderecoTexto()" class="btn-save-addr">Salvar Endereço</button>
+                </div>
+              </div>
+            </div>
+
+            <!-- ABA MAPA -->
+            <div class="addr-tab-content" id="tab-mapa">
+              <div class="cep-input-group" style="margin-bottom:8px">
+                <input type="text" id="mapaCepInput" placeholder="Digite o CEP para ir até o local" maxlength="9" oninput="buscarCepNoMapa()" onkeypress="if(event.key==='Enter')buscarCepNoMapa()">
+                <button onclick="buscarCepNoMapa()" class="btn-cep-buscar">Ir</button>
+              </div>
+              <p style="font-size:13px;color:#6b7280;margin-bottom:8px">Ou clique no mapa para selecionar sua localização</p>
+              <div id="addressMap" style="height:250px;border-radius:12px;margin-bottom:12px"></div>
+              <div id="mapaResult" style="display:none">
+                <div class="cep-result-fields">
+                  <input type="text" id="mapaLogradouro" placeholder="Logradouro" readonly>
+                  <input type="text" id="mapaBairro" placeholder="Bairro" readonly>
+                  <input type="text" id="mapaCidade" placeholder="Cidade" readonly>
+                  <input type="text" id="mapaEstado" placeholder="Estado" readonly>
+                  <input type="text" id="mapaNumero" placeholder="Número">
+                  <input type="text" id="mapaComplemento" placeholder="Complemento (opcional)">
+                </div>
+                <div class="cep-result-save">
+                  <input type="text" id="mapaLabelInput" placeholder="Ex: Casa, Trabalho" maxlength="20">
+                  <button onclick="salvarEnderecoMapa()" class="btn-save-addr">Salvar Endereço</button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="address-actions">
+        <% if (user) { %>
+          <a href="/perfil" class="addr-btn">Meu Perfil</a>
+          <a href="/logout" class="addr-btn addr-btn-outline">Sair</a>
+        <% } else { %>
+          <a href="/login" class="addr-btn">Entrar</a>
+          <a href="/register" class="addr-btn addr-btn-outline">Cadastrar</a>
+        <% } %>
+      </div>
+    </div>
+  </div>
+
+  <!-- CONTEÚDO PRINCIPAL -->
+  <div class="wrap" style="margin-top:80px">
+    <header>
+      <div class="hero-text">
+        <h1>Mais de 500 tipos<br>de serviços em um<br>só lugar</h1>
+        <p>Encontre profissionais verificados para qualquer necessidade — rápido e com segurança.</p>
+      </div>
+      <a href="/" style="text-decoration:none">
+        <div class="logo">
+          <svg width="120" height="120" viewBox="0 0 100 100" aria-hidden>
+            <defs>
+              <linearGradient id="g" x1="0" x2="1">
+                <stop offset="0" stop-color="#ffffff"/>
+                <stop offset="1" stop-color="#2e73dc"/>
+              </linearGradient>
+            </defs>
+            <rect rx="20" width="100" height="100" fill="url(#g)"></rect>
+            <text x="50" y="57" font-size="30" fill="#fff" font-family="Arial" text-anchor="middle">FIXOO</text>
+          </svg>
+        </div>
+      </a>
+    </header>
+
+    <main class="panel" role="main">
+      <div class="grid">
+        <a href="/categoria/moda-e-beleza">
+          <div class="card c-orange">
+            <div class="icon">📅</div>
+            <div class="label"><strong>Moda e Beleza</strong></div>
+          </div>
+        </a>
+        <a href="/categoria/assistencia-tecnica">
+          <div class="card c-yellow">
+            <div class="icon">🔧</div>
+            <div class="label"><strong>Assistência<br>técnica</strong></div>
+          </div>
+        </a>
+        <a href="/categoria/saude">
+          <div class="card c-red">
+            <div class="icon">❤</div>
+            <div class="label"><strong>Saúde</strong></div>
+          </div>
+        </a>
+        <a href="/categoria/reformas">
+          <div class="card c-blue">
+            <div class="icon">🏠</div>
+            <div class="label"><strong>Reformas<br>e serviços</strong></div>
+          </div>
+        </a>
+        <a href="/categoria/servicos-domesticos">
+          <div class="card c-green">
+            <div class="icon">🏡</div>
+            <div class="label"><strong>Serviços<br>domésticos</strong></div>
+          </div>
+        </a>
+        <a href="/categoria/outros">
+          <div class="card c-gray">
+            <div class="icon">⋯</div>
+            <div class="label"><strong style="color:#374151">Outros</strong></div>
+          </div>
+        </a>
+      </div>
+
+      <div class="search-wrap">
+        <div class="search">
+          <svg width="20" height="20" viewBox="0 0 24 24">
+            <path fill="#6b7280" d="M15.5 14h-.79l-.28-.27A6.471 6.471 0 0016 9.5 6.5 6.5 0 109.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zM10 15a5 5 0 110-10 5 5 0 010 10z"/>
+          </svg>
+          <input type="search" placeholder="Qual a sua necessidade?">
+        </div>
+        <button class="btn">Pesquisar</button>
+      </div>
+
+      <section class="cta">
+        <div class="left">
+          <h2>Contrate rápido</h2>
+          <p>✔ Profissionais verificados</p>
+        </div>
+        <div class="illustration">
+          <svg width="120" height="120" viewBox="0 0 200 200">
+            <circle cx="100" cy="62" r="28" fill="#ffdbb5"/>
+            <path d="M70 58 q30 -30 60 0 v10 h-60 z" fill="#f59e0b"/>
+            <rect x="68" y="92" width="64" height="66" rx="12" fill="#0ea5a9"/>
+            <rect x="78" y="92" width="8" height="46" fill="#0b6b5b" rx="4"/>
+            <rect x="114" y="92" width="8" height="46" fill="#0b6b5b" rx="4"/>
+          </svg>
+        </div>
+      </section>
+
+      <nav class="bottom-nav">
+        <div>Home</div>
+        <div>Buscar</div>
+        <div>Mensagens</div>
+        <a href="/perfil" style="color:inherit;text-decoration:none">Perfil</a>
+        <a href="/colaborador/login" style="color:inherit;text-decoration:none">Colaborador</a>
+        <a href="/colaborador" style="color:inherit;text-decoration:none">Seja um Colaborador</a>
+      </nav>
+    </main>
+  </div>
+
+  <!-- BOTÃO CHAT -->
+  <button id="chatButton">💬</button>
+  <div id="chatPopup">
+    <div class="chat-container">
+      <div class="chat-header">
+        <span class="chat-emoji">🤖</span>
+        <span class="chat-name">Bitto</span>
+        <button id="closeChat" style="margin-left:auto;background:none;border:none;color:white;font-size:18px;cursor:pointer">✖</button>
+      </div>
+      <div class="chat-box" id="chat-box"></div>
+      <div class="chat-input">
+        <input type="text" id="user-input" placeholder="Digite uma mensagem...">
+        <button onclick="sendMessage()">Enviar</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+  <script>
+    // === CHAT ===
+    const chatButton = document.getElementById("chatButton");
+    const chatPopup = document.getElementById("chatPopup");
+    const closeChat = document.getElementById("closeChat");
+    const chatBox = document.getElementById("chat-box");
+    const input = document.getElementById("user-input");
+
+    chatButton.onclick = () => {
+      chatPopup.style.display = "flex";
+      if (chatBox.innerHTML.trim() === "") addMessage("Olá! Me chamo Bitto 🤖 Como posso te ajudar?", "bot");
+    };
+    closeChat.onclick = () => { chatPopup.style.display = "none"; };
+    input.addEventListener("keypress", function(e) { if (e.key === "Enter") sendMessage(); });
+
+    async function sendMessage() {
+      const text = input.value.trim();
+      if (text === "") return;
+      addMessage(text, "user");
+      input.value = "";
+      try {
+        const response = await fetch("/chat", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ message: text }) });
+        const data = await response.json();
+        addMessage(data.reply, "bot");
+      } catch (error) { addMessage("Erro ao responder 😢", "bot"); console.error(error); }
+    }
+    window.sendMessage = sendMessage;
+
+    function addMessage(message, sender) {
+      const msg = document.createElement("div");
+      msg.classList.add("message", sender);
+      msg.textContent = message;
+      chatBox.appendChild(msg);
+      chatBox.scrollTop = chatBox.scrollHeight;
+    }
+
+    // === ENDEREÇO ===
+    let enderecoAtual = null;
+    let cepTimeout = null;
+    let textoTimeout = null;
+    let map = null;
+    let mapMarker = null;
+    let mapLatLng = null;
+
+    function toggleAddressDropdown() {
+      const dd = document.getElementById('addressDropdown');
+      const isOpen = dd.classList.contains('open');
+      dd.classList.toggle('open');
+      if (!isOpen) {
+        setTimeout(() => {
+          if (document.querySelector('#tab-mapa.active') && !map) initAddressMap();
+        }, 300);
+      }
+    }
+
+    // Só fecha o dropdown pelo botão ✕ ou clicando no endereço novamente
+
+    function switchAddrTab(tab, btn) {
+      document.querySelectorAll('.addr-tab').forEach(t => t.classList.remove('active'));
+      document.querySelectorAll('.addr-tab-content').forEach(t => t.classList.remove('active'));
+      btn.classList.add('active');
+      document.getElementById('tab-' + tab).classList.add('active');
+      if (tab === 'mapa') {
+        setTimeout(function() { initAddressMap(); }, 100);
+      }
+    }
+
+    // === BUSCA POR CEP (no campo da aba Endereço) ===
+    function extrairNumeroDoCep(value) {
+      const digits = value.replace(/\D/g, '');
+      if (digits.length <= 8) return '';
+      const resto = value.substring(value.indexOf(digits.substring(8)));
+      const numMatch = resto.match(/(\d+)/);
+      return numMatch ? numMatch[1] : '';
+    }
+
+    async function buscarTextoCEP(value) {
+      const digits = value.replace(/\D/g, '');
+      if (digits.length < 8) { document.getElementById('textoResult').style.display = 'none'; return; }
+
+      const cep = digits.substring(0, 8);
+      const numeroExtraido = extrairNumeroDoCep(value);
+
+      document.getElementById('textoSuggestions').innerHTML = '<div class="cep-suggestion-item loading">Buscando...</div>';
+
+      try {
+        const res = await fetch('/api/cep/' + cep);
+        const data = await res.json();
+
+        if (data.erro) {
+          document.getElementById('textoSuggestions').innerHTML = '<div class="cep-suggestion-item error">CEP não encontrado</div>';
+          return;
+        }
+
+        document.getElementById('textoSuggestions').innerHTML = '';
+
+        textoEnderecoSelecionado = {
+          cep: cep,
+          logradouro: data.logradouro || data.endereco || '',
+          bairro: data.bairro || '',
+          cidade: data.cidade || data.localidade || '',
+          estado: data.estado || data.uf || '',
+          numero: numeroExtraido || '',
+          complemento: '',
+          lat: data.lat || null,
+          lon: data.lon || null
+        };
+
+        document.getElementById('textoLogradouro').value = textoEnderecoSelecionado.logradouro;
+        document.getElementById('textoBairro').value = textoEnderecoSelecionado.bairro;
+        document.getElementById('textoCidade').value = textoEnderecoSelecionado.cidade;
+        document.getElementById('textoEstado').value = textoEnderecoSelecionado.estado;
+        document.getElementById('textoNumero').value = textoEnderecoSelecionado.numero;
+        document.getElementById('textoComplemento').value = '';
+        document.getElementById('textoResult').style.display = 'block';
+
+      } catch(e) {
+        document.getElementById('textoSuggestions').innerHTML = '<div class="cep-suggestion-item error">Erro ao buscar CEP</div>';
+      }
+    }
+
+    // === BUSCA POR TEXTO (Nominatim) ===
+    let textoEnderecoSelecionado = null;
+    let textoNumeroExtraido = '';
+
+    function extrairNumeroDaBusca(query) {
+      const match = query.match(/(\d+\s*)$/);
+      return match ? match[1].trim() : '';
+    }
+
+    async function buscarEnderecoPorTexto(value) {
+      if (textoTimeout) clearTimeout(textoTimeout);
+      document.getElementById('textoResult').style.display = 'none';
+      if (value.length < 5) {
+        document.getElementById('textoSuggestions').innerHTML = '';
+        return;
+      }
+
+      // Extrai número do final da busca
+      textoNumeroExtraido = extrairNumeroDaBusca(value);
+      const querySemNumero = value.replace(/(\d+\s*)$/, '').trim();
+
+      textoTimeout = setTimeout(async function() {
+        document.getElementById('textoSuggestions').innerHTML = '<div class="cep-suggestion-item loading">Buscando...</div>';
+        try {
+          const res = await fetch('/api/buscar-endereco?q=' + encodeURIComponent(querySemNumero || value));
+          const data = await res.json();
+          document.getElementById('textoSuggestions').innerHTML = '';
+
+          if (!data || data.length === 0) {
+            document.getElementById('textoSuggestions').innerHTML = '<div class="cep-suggestion-item error">Nenhum resultado encontrado</div>';
+            return;
+          }
+
+          data.forEach(function(item) {
+            const div = document.createElement('div');
+            div.className = 'cep-suggestion-item';
+            const nomeRua = item.logradouro || '';
+            const bairroNome = item.bairro || '';
+            const cidadeNome = item.cidade || '';
+            const estadoNome = item.estado || '';
+            const displayNumero = textoNumeroExtraido ? ', <strong>' + textoNumeroExtraido + '</strong>' : '';
+            div.innerHTML = '<strong>' + nomeRua + displayNumero + '</strong><br><span>' + (bairroNome ? bairroNome + ' - ' : '') + cidadeNome + (estadoNome ? '/' + estadoNome : '') + '</span>';
+            if (item.cep) div.innerHTML += '<br><small style="color:#9ca3af">CEP: ' + item.cep + '</small>';
+            div.onclick = function() {
+              document.getElementById('textoSuggestions').innerHTML = '';
+              textoEnderecoSelecionado = item;
+              preencherTextoResultado(item, textoNumeroExtraido);
+            };
+            document.getElementById('textoSuggestions').appendChild(div);
+          });
+        } catch(e) {
+          document.getElementById('textoSuggestions').innerHTML = '<div class="cep-suggestion-item error">Erro na busca</div>';
+        }
+      }, 500);
+    }
+
+    function preencherTextoResultado(item, numero) {
+      document.getElementById('textoResult').style.display = 'block';
+      document.getElementById('textoLogradouro').value = item.logradouro || item.display_name || '';
+      document.getElementById('textoBairro').value = item.bairro || '';
+      document.getElementById('textoCidade').value = item.cidade || '';
+      document.getElementById('textoEstado').value = item.estado || '';
+      document.getElementById('textoNumero').value = numero || '';
+      document.getElementById('textoComplemento').value = '';
+      document.getElementById('textoLabelInput').value = '';
+      if (textoEnderecoSelecionado) {
+        textoEnderecoSelecionado.numero = numero || '';
+      }
+    }
+
+    function atualizarTextoCompleto() {
+      const num = document.getElementById('textoNumero').value;
+      const comp = document.getElementById('textoComplemento').value;
+      if (textoEnderecoSelecionado) {
+        textoEnderecoSelecionado.numero = num;
+        textoEnderecoSelecionado.complemento = comp;
+      }
+    }
+
+    async function salvarEnderecoTexto() {
+      const label = document.getElementById('textoLabelInput').value.trim();
+      if (!label) { alert('Digite um nome para o endereço (ex: Casa, Trabalho)'); return; }
+      if (!textoEnderecoSelecionado) { alert('Selecione um endereço da busca'); return; }
+
+      const addr = {
+        label: label,
+        cep: textoEnderecoSelecionado.cep || '',
+        logradouro: document.getElementById('textoLogradouro').value,
+        bairro: document.getElementById('textoBairro').value,
+        cidade: document.getElementById('textoCidade').value,
+        estado: document.getElementById('textoEstado').value,
+        numero: document.getElementById('textoNumero').value,
+        complemento: document.getElementById('textoComplemento').value,
+        lat: textoEnderecoSelecionado.lat || null,
+        lon: textoEnderecoSelecionado.lon || null
+      };
+
+      try {
+        const res = await fetch('/api/endereco/salvar', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(addr)
+        });
+        const data = await res.json();
+        if (data.success) {
+          alert('Endereço salvo com sucesso!');
+          document.getElementById('textoLabelInput').value = '';
+          document.getElementById('textoResult').style.display = 'none';
+          document.getElementById('textoEndereco').value = '';
+          atualizarListaEnderecos();
+          selectAddress(data.id);
+        } else {
+          alert(data.error || 'Erro ao salvar');
+        }
+      } catch(e) { alert('Erro ao salvar endereço'); }
+    }
+
+    // === MAPA INTERATIVO ===
+    function initAddressMap() {
+      const container = document.getElementById('addressMap');
+      if (!container || container._leaflet_id) {
+        if (map) map.invalidateSize();
+        return;
+      }
+
+      map = L.map('addressMap').setView([-23.5505, -46.6333], 13);
+      L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        attribution: '&copy; OpenStreetMap contributors'
+      }).addTo(map);
+
+      // Se já tem endereço atual, centraliza nele
+      if (enderecoAtual && enderecoAtual.lat && enderecoAtual.lon) {
+        const latlng = [parseFloat(enderecoAtual.lat), parseFloat(enderecoAtual.lon)];
+        map.setView(latlng, 16);
+        mapMarker = L.marker(latlng, { draggable: true }).addTo(map);
+        mapLatLng = latlng;
+        mapMarker.on('dragend', function(ev) {
+          mapLatLng = ev.target.getLatLng();
+          reverseGeocode(mapLatLng.lat, mapLatLng.lng);
+        });
+      }
+
+      map.on('click', function(e) {
+        if (mapMarker) {
+          map.setView(e.latlng, map.getZoom());
+          mapMarker.setLatLng(e.latlng);
+        } else {
+          mapMarker = L.marker(e.latlng, { draggable: true }).addTo(map);
+          mapMarker.on('dragend', function(ev) {
+            mapLatLng = ev.target.getLatLng();
+            reverseGeocode(mapLatLng.lat, mapLatLng.lng);
+          });
+        }
+        mapLatLng = e.latlng;
+        reverseGeocode(e.latlng.lat, e.latlng.lng);
+      });
+    }
+
+    async function reverseGeocode(lat, lng) {
+      document.getElementById('mapaResult').style.display = 'block';
+      document.getElementById('mapaLogradouro').value = 'Carregando...';
+      document.getElementById('mapaBairro').value = '';
+      document.getElementById('mapaCidade').value = '';
+      document.getElementById('mapaEstado').value = '';
+      document.getElementById('mapaNumero').value = '';
+      document.getElementById('mapaComplemento').value = '';
+
+      try {
+        const res = await fetch('/api/geocode-reverso?lat=' + lat + '&lon=' + lng);
+        const data = await res.json();
+        document.getElementById('mapaLogradouro').value = data.logradouro || data.display_name || '';
+        document.getElementById('mapaBairro').value = data.bairro || '';
+        document.getElementById('mapaCidade').value = data.cidade || '';
+        document.getElementById('mapaEstado').value = data.estado || '';
+        if (data.cep) document.getElementById('mapaCepInput').value = data.cep;
+        enderecoAtual = data;
+        enderecoAtual.lat = lat;
+        enderecoAtual.lon = lng;
+      } catch(e) {
+        document.getElementById('mapaLogradouro').value = 'Erro ao buscar endereço';
+      }
+    }
+
+    // === BUSCAR CEP NO MAPA ===
+    async function buscarCepNoMapa() {
+      const cepInput = document.getElementById('mapaCepInput');
+      if (!cepInput) return;
+      const cep = cepInput.value.replace(/\D/g, '');
+      if (cep.length !== 8) return;
+
+      document.getElementById('mapaResult').style.display = 'block';
+      var logField = document.getElementById('mapaLogradouro');
+      logField.value = 'Buscando CEP...';
+
+      try {
+        var res = await fetch('/api/cep/' + cep);
+        var data = await res.json();
+        if (data.erro) { logField.value = 'CEP não encontrado'; return; }
+
+        logField.value = data.logradouro || '';
+        document.getElementById('mapaBairro').value = data.bairro || '';
+        document.getElementById('mapaCidade').value = data.cidade || '';
+        document.getElementById('mapaEstado').value = data.estado || '';
+        document.getElementById('mapaNumero').value = '';
+        document.getElementById('mapaComplemento').value = '';
+        enderecoAtual = data;
+
+        if (data.lat && data.lon) {
+          if (!map) initAddressMap();
+          if (map) {
+            map.invalidateSize();
+            map.setView([Number(data.lat), Number(data.lon)], 16);
+            if (mapMarker) {
+              mapMarker.setLatLng([Number(data.lat), Number(data.lon)]);
+            } else {
+              mapMarker = L.marker([Number(data.lat), Number(data.lon)], { draggable: true }).addTo(map);
+              mapMarker.on('dragend', function(e) {
+                mapLatLng = e.target.getLatLng();
+                reverseGeocode(mapLatLng.lat, mapLatLng.lng);
+              });
+            }
+            mapLatLng = [Number(data.lat), Number(data.lon)];
+            logField.value = 'movido! centro=' + map.getCenter().lat + ',' + map.getCenter().lng;
+          }
+        } else {
+          logField.value = 'sem coordenadas, nominatim...';
+          var geoRes = await fetch('/api/buscar-endereco?q=' + encodeURIComponent(data.logradouro + ', ' + data.bairro + ', ' + data.cidade + ', ' + data.estado));
+          var geoData = await geoRes.json();
+          if (geoData && geoData.length > 0) {
+            if (!map) { logField.value = 'map nulo nominatim...'; initAddressMap(); }
+            if (map) {
+              map.invalidateSize();
+              map.setView([Number(geoData[0].lat), Number(geoData[0].lon)], 16);
+              if (mapMarker) {
+                mapMarker.setLatLng([Number(geoData[0].lat), Number(geoData[0].lon)]);
+              } else {
+                mapMarker = L.marker([Number(geoData[0].lat), Number(geoData[0].lon)], { draggable: true }).addTo(map);
+                mapMarker.on('dragend', function(e) {
+                  mapLatLng = e.target.getLatLng();
+                  reverseGeocode(mapLatLng.lat, mapLatLng.lng);
+                });
+              }
+              mapLatLng = [Number(geoData[0].lat), Number(geoData[0].lon)];
+              enderecoAtual.lat = Number(geoData[0].lat);
+              enderecoAtual.lon = Number(geoData[0].lon);
+              logField.value = 'nominatim ok! centro=' + map.getCenter().lat;
+            }
+          } else {
+            logField.value = 'nominatim sem resultados';
+          }
+        }
+      } catch(e) {
+        logField.value = 'Erro: ' + e.message;
+      }
+    }
+
+    async function salvarEnderecoMapa() {
+      const label = document.getElementById('mapaLabelInput').value.trim();
+      if (!label) { alert('Digite um nome para o endereço'); return; }
+      if (!enderecoAtual) { alert('Selecione um local no mapa'); return; }
+
+      const addr = {
+        label: label,
+        cep: document.getElementById('mapaCepInput').value.replace(/\D/g, '') || '',
+        logradouro: document.getElementById('mapaLogradouro').value,
+        bairro: document.getElementById('mapaBairro').value,
+        cidade: document.getElementById('mapaCidade').value,
+        estado: document.getElementById('mapaEstado').value,
+        numero: document.getElementById('mapaNumero').value,
+        complemento: document.getElementById('mapaComplemento').value,
+        lat: enderecoAtual.lat || null,
+        lon: enderecoAtual.lon || null
+      };
+
+      try {
+        const res = await fetch('/api/endereco/salvar', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(addr)
+        });
+        const data = await res.json();
+        if (data.success) {
+          alert('Endereço salvo com sucesso!');
+          document.getElementById('mapaLabelInput').value = '';
+          atualizarListaEnderecos();
+          selectAddress(data.id);
+          document.getElementById('mapaResult').style.display = 'none';
+        } else {
+          alert(data.error || 'Erro ao salvar');
+        }
+      } catch(e) { alert('Erro ao salvar endereço'); }
+    }
+
+    async function deleteAddress(id) {
+      if (!confirm('Excluir este endereço?')) return;
+      try {
+        const res = await fetch('/api/endereco/excluir', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ id: id })
+        });
+        const data = await res.json();
+        if (data.success) atualizarListaEnderecos();
+      } catch(e) { alert('Erro ao excluir'); }
+    }
+
+    async function selectAddress(id) {
+      try {
+        const res = await fetch('/api/endereco/definir', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ id: id })
+        });
+        const data = await res.json();
+        if (data.success) {
+          document.getElementById('addrLabel').textContent = data.endereco.label;
+          document.getElementById('addrDescription').textContent = data.endereco.logradouro + (data.endereco.numero ? ', ' + data.endereco.numero : '') + ' - ' + data.endereco.bairro;
+        }
+      } catch(e) { alert('Erro ao selecionar endereço'); }
+    }
+
+    async function atualizarListaEnderecos() {
+      try {
+        const res = await fetch('/api/enderecos');
+        const data = await res.json();
+        const lista = document.getElementById('savedAddressesList');
+        if (!data.length) {
+          lista.innerHTML = '<p class="empty-addrs">Nenhum endereço salvo ainda.</p>';
+          return;
+        }
+        lista.innerHTML = data.map(function(addr) {
+          const icon = addr.label === 'Casa' ? '🏠' : addr.label === 'Trabalho' ? '💼' : '📍';
+          return '<div class="saved-address-item" onclick="selectAddress(' + addr.id + ')">' +
+            '<span class="saved-addr-icon">' + icon + '</span>' +
+            '<div class="saved-addr-info">' +
+              '<strong>' + addr.label + '</strong>' +
+              '<span>' + (addr.logradouro || '') + (addr.numero ? ', ' + addr.numero : '') + ' - ' + (addr.bairro || '') + ', ' + (addr.cidade || '') + ' ' + (addr.cep || '') + '</span>' +
+            '</div>' +
+            '<button class="saved-addr-delete" onclick="event.stopPropagation(); deleteAddress(' + addr.id + ')" title="Excluir">🗑</button>' +
+          '</div>';
+        }).join('');
+      } catch(e) {}
+    }
+  </script>
+</body>
+</html>

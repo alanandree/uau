@@ -17,7 +17,6 @@
     .star-empty { color:#d1d5db; font-size:18px; }
     .perfil-contato { display:flex; gap:12px; margin-top:10px; flex-wrap:wrap; }
     .perfil-contato a { padding:8px 18px; border-radius:20px; font-size:13px; font-weight:600; text-decoration:none; display:inline-block; }
-    .btn-wpp { background:#25d366; color:#fff; }
     .btn-instagram { background:linear-gradient(45deg,#f09433,#e6683c,#dc2743,#cc2366,#bc1888); color:#fff; }
     .detalhes-grid { display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-bottom:24px; background:#f9fafb; border-radius:12px; padding:16px;font-size:14px;color:#444; }
     .servicos-lista { list-style:none; padding:0; margin:16px 0; display:grid; grid-template-columns:repeat(3,1fr); gap:12px; }
@@ -62,9 +61,6 @@
             <span style="font-size:13px;color:#6b7280;margin-left:4px"><%= media.toFixed(1) %> (<%= totalAvaliacoes %>)</span>
           </div>
           <div class="perfil-contato">
-            <% if (colab.whatsapp) { var wpp = colab.whatsapp.replace(/\D/g,''); %>
-              <a href="https://wa.me/55<%= wpp %>" target="_blank" class="btn-wpp">Falar no WhatsApp</a>
-            <% } %>
             <% if (colab.instagram) { %>
               <a href="https://instagram.com/<%= colab.instagram.replace('@','') %>" target="_blank" class="btn-instagram">Instagram</a>
             <% } %>
@@ -102,7 +98,6 @@
       <% } else { %>
         <div class="no-services">
           <p>Este profissional ainda não cadastrou seus serviços.</p>
-          <p>Entre em contato pelo WhatsApp para mais informações.</p>
         </div>
       <% } %>
 

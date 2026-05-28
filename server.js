@@ -5,6 +5,7 @@ const session = require('express-session');
 const sqlite3 = require("sqlite3").verbose();
 const { GoogleGenerativeAI } = require('@google/generative-ai');
 const bcrypt = require('bcryptjs');
+const https = require('https');
 const authRoutes = require('./routes/auth');
 
 const app = express();
@@ -20,7 +21,6 @@ app.use((req, res, next) => {
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
-app.use(express.static(path.join(__dirname, "public")));
 
 app.use(session({
   secret: 'site-final-secret-key',
@@ -31,6 +31,27 @@ app.use(session({
     maxAge: 1000 * 60 * 60 * 24
   }
 }));
+
+app.get("/", (req, res) => {
+  if (req.session && req.session.userId) {
+    db.get("SELECT id, name, email, phone, profile_picture, addresses, createdAt, cliente_rating, cliente_total_avaliacoes FROM usuarios WHERE id = ?", [req.session.userId], (err, user) => {
+      let addresses = [];
+      let enderecoAtual = null;
+      if (user) {
+        try { addresses = JSON.parse(user.addresses || '[]'); } catch(e) {}
+        if (req.session.enderecoAtualId) {
+          enderecoAtual = addresses.find(function(a) { return a.id == req.session.enderecoAtualId; }) || null;
+        }
+        if (!enderecoAtual && addresses.length > 0) {
+          enderecoAtual = addresses[0];
+        }
+      }
+      res.render('index', { user: user ? { ...user, addresses, enderecoAtual } : null });
+    });
+  } else {
+    res.render('index', { user: null });
+  }
+});
 
 const db = new sqlite3.Database("database.db", (err) => {
   if (err) {
@@ -542,13 +563,6 @@ app.get("/teste", (req, res) => {
   res.send("Servidor funcionando!");
 });
 
-app.get("/", (req, res) => {
-  if (req.session && req.session.userId) {
-    return res.redirect('/dashboard');
-  }
-  res.redirect('/login');
-});
-
 const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY || '');
 
 const respostas = [
@@ -652,6 +666,201 @@ app.get("/estabelecimentos", (req, res) => {
     res.json(rows);
   });
 });
+
+let ultimaNominatim = 0;
+
+function fetchJson(url) {
+  return new Promise(function(resolve, reject) {
+    const parsedUrl = new URL(url);
+    const options = {
+      hostname: parsedUrl.hostname,
+      path: parsedUrl.pathname + parsedUrl.search,
+      method: 'GET',
+      headers: {
+        'User-Agent': 'FixooApp/1.0 (contato@fixoo.com)'
+      },
+      rejectUnauthorized: false
+    };
+    const req = https.get(options, function(res) {
+      let data = '';
+      res.on('data', function(chunk) { data += chunk; });
+      res.on('end', function() {
+        try { resolve(JSON.parse(data)); } catch(e) { reject(e); }
+      });
+    });
+    req.on('error', reject);
+    req.setTimeout(10000, function() { req.destroy(); reject(new Error('Timeout')); });
+  });
+}
+
+async function fetchNominatim(url) {
+  const agora = Date.now();
+  const diff = agora - ultimaNominatim;
+  if (diff < 1200) {
+    await new Promise(function(r) { setTimeout(r, 1200 - diff); });
+  }
+  ultimaNominatim = Date.now();
+  return fetchJson(url);
+}
+
+app.get('/api/cep/:cep', async (req, res) => {
+  const cep = req.params.cep.replace(/\D/g, '');
+  if (cep.length !== 8) return res.json({ erro: true });
+
+  try {
+    const data = await fetchJson('https://viacep.com.br/ws/' + cep + '/json/');
+    if (data.erro) return res.json({ erro: true });
+
+    const result = {
+      cep: data.cep,
+      logradouro: data.logradouro,
+      bairro: data.bairro,
+      cidade: data.localidade,
+      estado: data.uf,
+      uf: data.uf,
+      localidade: data.localidade,
+      lat: null,
+      lon: null
+    };
+
+    // Busca coordenadas no Nominatim
+    try {
+      const geoData = await fetchNominatim('https://nominatim.openstreetmap.org/search?format=json&q=' + encodeURIComponent(data.logradouro + ', ' + (data.bairro || '') + ', ' + data.localidade + ', ' + data.uf) + '&limit=1');
+      if (geoData && geoData.length > 0) {
+        result.lat = parseFloat(geoData[0].lat);
+        result.lon = parseFloat(geoData[0].lon);
+      }
+    } catch(e) {}
+
+    res.json(result);
+  } catch(e) {
+    res.json({ erro: true });
+  }
+});
+
+app.get('/api/buscar-endereco', async (req, res) => {
+  const q = req.query.q;
+  if (!q || q.length < 5) return res.json([]);
+
+  try {
+    const data = await fetchNominatim('https://nominatim.openstreetmap.org/search?format=json&q=' + encodeURIComponent(q) + '&limit=5&addressdetails=1');
+    const results = (data || []).map(function(item) {
+      const addr = item.address || {};
+      return {
+        display_name: item.display_name,
+        lat: item.lat,
+        lon: item.lon,
+        logradouro: (addr.road || addr.pedestrian || addr.street || ''),
+        bairro: (addr.neighbourhood || addr.suburb || addr.district || ''),
+        cidade: (addr.city || addr.town || addr.village || addr.municipality || ''),
+        estado: (addr.state || ''),
+        cep: (addr.postcode || '')
+      };
+    });
+    res.json(results);
+  } catch(e) {
+    res.json([]);
+  }
+});
+
+app.get('/api/geocode-reverso', async (req, res) => {
+  const { lat, lon } = req.query;
+  if (!lat || !lon) return res.json({});
+
+  try {
+    const data = await fetchNominatim('https://nominatim.openstreetmap.org/reverse?format=json&lat=' + lat + '&lon=' + lon + '&addressdetails=1');
+    const addr = data.address || {};
+    res.json({
+      display_name: data.display_name || '',
+      logradouro: (addr.road || addr.pedestrian || addr.street || data.display_name || ''),
+      bairro: (addr.neighbourhood || addr.suburb || addr.district || ''),
+      cidade: (addr.city || addr.town || addr.village || addr.municipality || ''),
+      estado: (addr.state || ''),
+      cep: (addr.postcode || ''),
+      lat: lat,
+      lon: lon
+    });
+  } catch(e) {
+    res.json({});
+  }
+});
+
+app.post('/api/endereco/salvar', (req, res) => {
+  if (!req.session || !req.session.userId) return res.status(401).json({ error: 'Faça login para salvar endereços.' });
+
+  const { label, cep, logradouro, bairro, cidade, estado, numero, complemento, lat, lon } = req.body;
+  if (!label || !logradouro) return res.status(400).json({ error: 'Nome e logradouro obrigatórios.' });
+
+  db.get("SELECT addresses FROM usuarios WHERE id = ?", [req.session.userId], (err, row) => {
+    let addresses = [];
+    try { addresses = JSON.parse(row.addresses || '[]'); } catch(e) {}
+
+    const novoEndereco = {
+      id: Date.now(),
+      label: label,
+      cep: cep || '',
+      logradouro: logradouro,
+      bairro: bairro || '',
+      cidade: cidade || '',
+      estado: estado || '',
+      numero: numero || '',
+      complemento: complemento || '',
+      lat: lat || null,
+      lon: lon || null
+    };
+
+    addresses.push(novoEndereco);
+    db.run("UPDATE usuarios SET addresses = ? WHERE id = ?", [JSON.stringify(addresses), req.session.userId], (err) => {
+      if (err) return res.status(500).json({ error: 'Erro ao salvar endereço.' });
+      req.session.enderecoAtualId = novoEndereco.id;
+      res.json({ success: true, id: novoEndereco.id, endereco: novoEndereco });
+    });
+  });
+});
+
+app.post('/api/endereco/excluir', (req, res) => {
+  if (!req.session || !req.session.userId) return res.status(401).json({ error: 'Não autorizado.' });
+  const { id } = req.body;
+
+  db.get("SELECT addresses FROM usuarios WHERE id = ?", [req.session.userId], (err, row) => {
+    let addresses = [];
+    try { addresses = JSON.parse(row.addresses || '[]'); } catch(e) {}
+    addresses = addresses.filter(function(a) { return a.id != id; });
+    db.run("UPDATE usuarios SET addresses = ? WHERE id = ?", [JSON.stringify(addresses), req.session.userId], (err) => {
+      if (err) return res.status(500).json({ error: 'Erro ao excluir.' });
+      if (req.session.enderecoAtualId == id) {
+        req.session.enderecoAtualId = addresses.length > 0 ? addresses[0].id : null;
+      }
+      res.json({ success: true });
+    });
+  });
+});
+
+app.post('/api/endereco/definir', (req, res) => {
+  if (!req.session || !req.session.userId) return res.status(401).json({ error: 'Não autorizado.' });
+  const { id } = req.body;
+
+  db.get("SELECT addresses FROM usuarios WHERE id = ?", [req.session.userId], (err, row) => {
+    let addresses = [];
+    try { addresses = JSON.parse(row.addresses || '[]'); } catch(e) {}
+    const endereco = addresses.find(function(a) { return a.id == id; });
+    if (!endereco) return res.status(404).json({ error: 'Endereço não encontrado.' });
+
+    req.session.enderecoAtualId = id;
+    res.json({ success: true, endereco: endereco });
+  });
+});
+
+app.get('/api/enderecos', (req, res) => {
+  if (!req.session || !req.session.userId) return res.status(401).json([]);
+  db.get("SELECT addresses FROM usuarios WHERE id = ?", [req.session.userId], (err, row) => {
+    let addresses = [];
+    try { addresses = JSON.parse(row.addresses || '[]'); } catch(e) {}
+    res.json(addresses);
+  });
+});
+
+app.use(express.static(path.join(__dirname, "public")));
 
 app.listen(port, () => {
   console.log(`Servidor rodando em http://localhost:${port}`);

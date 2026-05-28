@@ -211,10 +211,12 @@
     border-radius: 18px !important;
     padding: 16px !important;
     display: flex !important;
+    flex-direction: row !important;
     align-items: center !important;
     gap: 14px !important;
     text-align: left !important;
     box-shadow: 0 6px 16px rgba(16,24,40,0.04) !important;
+    min-height: 100px !important;
   }
   .colab-card .colab-avatar {
     width: 56px !important;

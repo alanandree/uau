@@ -1,5 +1,5 @@
 node_modules/
 .env
-uploads/
+# uploads/ is tracked with .gitkeep
 # database.db is tracked intentionally
 .DS_Store

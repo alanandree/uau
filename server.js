@@ -1,6 +1,7 @@
 require('dotenv').config();
 const express = require("express");
 const path = require("path");
+const fs = require('fs');
 const session = require('express-session');
 const sqlite3 = require("sqlite3").verbose();
 const { GoogleGenerativeAI } = require('@google/generative-ai');
@@ -10,6 +11,9 @@ const authRoutes = require('./routes/auth');
 
 const app = express();
 const port = process.env.PORT || 3001;
+
+const uploadsDir = path.join(__dirname, 'public', 'uploads');
+if (!fs.existsSync(uploadsDir)) fs.mkdirSync(uploadsDir, { recursive: true });
 
 app.set('view engine', 'ejs');
 app.set('views', path.join(__dirname, 'views'));

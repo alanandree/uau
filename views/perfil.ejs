@@ -114,24 +114,10 @@
         </details>
       </section>
 
-      <!-- HISTÓRICO DE PEDIDOS -->
+      <!-- PEDIDOS -->
       <section id="pedidos" class="tab-content">
-        <h1>Histórico de Pedidos</h1>
-        <% if (orders.length > 0) { %>
-          <div class="items-list">
-            <% orders.forEach(function(order) { %>
-              <div class="item-card">
-                <div class="item-info">
-                  <strong><%= order.description %></strong>
-                  <p>R$ <%= order.value ? order.value.toFixed(2) : '0,00' %></p>
-                  <small><%= new Date(order.date).toLocaleDateString('pt-BR') %></small>
-                </div>
-              </div>
-            <% }); %>
-          </div>
-        <% } else { %>
-          <p class="empty-msg">Nenhum pedido realizado ainda.</p>
-        <% } %>
+        <h1>Meus Pedidos</h1>
+        <div id="pedidos-lista"><p class="empty-msg">Carregando...</p></div>
       </section>
 
       <!-- CHAT -->
@@ -245,6 +231,7 @@
         var tab = this.getAttribute('data-tab');
         document.getElementById(tab).classList.add('active');
         if (tab === 'chat') loadPedidosCliente();
+        if (tab === 'pedidos') loadMeusPedidos();
       });
     });
 
@@ -329,6 +316,44 @@
         body: JSON.stringify({ mensagem: msg, tipo: 'cliente' })
       }).then(function(r) { return r.json(); }).then(function(d) {
         if (d.success) loadMessagesCliente(chatPedidoIdCliente);
+      });
+    }
+
+    function loadMeusPedidos() {
+      var el = document.getElementById('pedidos-lista');
+      el.innerHTML = '<p class="empty-msg">Carregando...</p>';
+      fetch('/api/pedidos/cliente', { credentials: 'same-origin' }).then(function(r) { return r.json(); }).then(function(data) {
+        if (!data.length) { el.innerHTML = '<p class="empty-msg">Nenhum pedido realizado ainda.</p>'; return; }
+        el.innerHTML = data.map(function(p) {
+          var snames = Array.isArray(p.servicos) ? p.servicos.map(function(s) { return s.nome || s; }).join(', ') : '';
+          var userOk = p.user_concluido ? 1 : 0;
+          var colabOk = p.colab_concluido ? 1 : 0;
+          var concluido = userOk && colabOk;
+          var statusLabel = concluido ? 'Concluido' : (userOk ? 'Aguardando profissional' : (colabOk ? 'Aguardando sua confirmacao' : 'Pendente'));
+          var statusColor = concluido ? 'background:#dcfce7;color:#16a34a' : 'background:#fef3c7;color:#d97706';
+          return '<div class="item-card">' +
+            '<div class="item-info">' +
+              '<strong>' + (p.colab_nome || 'Profissional') + '</strong>' +
+              '<p style="font-size:13px;color:#4b5563">' + snames + '</p>' +
+              '<p><strong>R$ ' + (p.total ? Number(p.total).toFixed(2).replace('.', ',') : '0,00') + '</strong></p>' +
+              '<span style="display:inline-block;padding:2px 10px;border-radius:10px;font-size:11px;font-weight:600;' + statusColor + '">' + statusLabel + '</span>' +
+              '<small style="display:block;margin-top:4px;color:#9ca3af">Pedido #' + p.id + ' - ' + new Date(p.data).toLocaleDateString('pt-BR') + '</small>' +
+            '</div>' +
+            (!userOk ? '<form onsubmit="concluirPedido(' + p.id + ');return false" style="display:inline"><button type="submit" style="padding:8px 16px;background:#10b981;color:#fff;border:none;border-radius:8px;font-weight:600;cursor:pointer;font-size:13px">Concluir</button></form>' : '') +
+          '</div>';
+        }).join('');
+      }).catch(function() {
+        el.innerHTML = '<p class="empty-msg">Erro ao carregar pedidos.</p>';
+      });
+    }
+
+    function concluirPedido(pedidoId) {
+      fetch('/api/pedido/' + pedidoId + '/concluir', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        credentials: 'same-origin'
+      }).then(function(r) { return r.json(); }).then(function(d) {
+        if (d.success) loadMeusPedidos();
       });
     }
 

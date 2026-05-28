@@ -26,6 +26,7 @@
     .acoes-card { margin-top:10px; display:flex; gap:8px; flex-wrap:wrap; }
     .acoes-card button, .acoes-card a { padding:7px 16px; border-radius:8px; font-size:12px; font-weight:600; border:none; cursor:pointer; text-decoration:none; display:inline-block; }
     .btn-confirmar { background:#10b981; color:#fff; }
+    .btn-concluir { background:#f59e0b; color:#fff; }
     .btn-chat { background:#3b82f6; color:#fff; }
     .btn-avaliar { background:#8b5cf6; color:#fff; }
 
@@ -302,7 +303,12 @@
         if (!data.length) { el.innerHTML = '<p style="text-align:center;color:#9ca3af;padding:40px">Nenhuma solicitação ainda.</p>'; return; }
         el.innerHTML = data.map(function(p) {
           var snames = Array.isArray(p.servicos) ? p.servicos.map(function(s) { return s.nome || s; }).join(', ') : '';
-          var stars = 'Sem avaliação';
+          var stars = 'Sem avaliacao';
+          var userOk = p.user_concluido ? 1 : 0;
+          var colabOk = p.colab_concluido ? 1 : 0;
+          var concluido = userOk && colabOk;
+          var statusLabel = concluido ? 'Concluido' : (colabOk ? 'Aguardando cliente' : (userOk ? 'Aguardando sua confirmacao' : (p.status === 'confirmado' ? 'Confirmado' : 'Pendente')));
+          var statusClass = concluido ? 'status-confirmado' : (p.status === 'confirmado' ? 'status-confirmado' : 'status-pendente');
           return '<div class="pedido-card" data-pedido-id="' + p.id + '" data-user-id="' + p.user_id + '">' +
             '<div class="topo-card">' +
               '<div>' +
@@ -312,12 +318,13 @@
                 '<div class="total-valor">R$ ' + (p.total ? Number(p.total).toFixed(2).replace('.', ',') : '0,00') + '</div>' +
                 (p.codigo_confirmacao ? '<div class="codigo-badge">' + p.codigo_confirmacao + '</div>' : '') +
               '</div>' +
-              '<span class="status-badge status-' + (p.status || 'pendente') + '">' + (p.status || 'pendente') + '</span>' +
+              '<span class="status-badge ' + statusClass + '">' + statusLabel + '</span>' +
             '</div>' +
             '<div class="acoes-card">' +
               (p.status === 'pendente' ? '<button class="btn-confirmar">Confirmar</button>' : '') +
+              (!colabOk && p.status !== 'pendente' && !concluido ? '<button class="btn-concluir">Concluir</button>' : '') +
               '<button class="btn-chat">Conversar</button>' +
-              (p.status !== 'cancelado' ? '<button class="btn-avaliar">Avaliar Cliente</button>' : '') +
+              (!concluido ? '<button class="btn-avaliar">Avaliar Cliente</button>' : '') +
             '</div>' +
           '</div>';
         }).join('');
@@ -331,7 +338,13 @@
       if (!card) return;
       var pedidoId = parseInt(card.getAttribute('data-pedido-id'));
       var userId = parseInt(card.getAttribute('data-user-id'));
-      if (e.target.classList.contains('btn-confirmar')) {
+      if (e.target.classList.contains('btn-concluir')) {
+        fetch('/api/pedido/' + pedidoId + '/concluir-colab', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          credentials: 'same-origin'
+        }).then(function(r) { return r.json(); }).then(function(d) { if (d.success) loadPedidos(); });
+      } else if (e.target.classList.contains('btn-confirmar')) {
         fetch('/api/pedido/' + pedidoId + '/status', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },

@@ -192,6 +192,8 @@ db.run(`
 
 db.run(`ALTER TABLE pedidos ADD COLUMN payment_method TEXT DEFAULT NULL`, () => {});
 db.run(`ALTER TABLE pedidos ADD COLUMN codigo_confirmacao TEXT DEFAULT NULL`, () => {});
+db.run(`ALTER TABLE pedidos ADD COLUMN user_concluido INTEGER DEFAULT 0`, () => {});
+db.run(`ALTER TABLE pedidos ADD COLUMN colab_concluido INTEGER DEFAULT 0`, () => {});
 
 db.run(`
   CREATE TABLE IF NOT EXISTS mensagens (
@@ -480,6 +482,25 @@ app.post('/api/pedido/:id/status', isColab, (req, res) => {
   const { status } = req.body;
   db.run("UPDATE pedidos SET status = ? WHERE id = ? AND colaborador_id = ?", [status, req.params.id, req.session.colabId], () => {
     res.json({ success: true });
+  });
+});
+
+app.post('/api/pedido/:id/concluir', (req, res) => {
+  if (!req.session || !req.session.userId) return res.status(401).json({ error: 'Não autorizado.' });
+  db.run("UPDATE pedidos SET user_concluido = 1 WHERE id = ? AND user_id = ?", [req.params.id, req.session.userId], function(err) {
+    if (err) return res.status(500).json({ error: 'Erro ao concluir.' });
+    db.run("UPDATE pedidos SET status = 'concluido' WHERE id = ? AND user_concluido = 1 AND colab_concluido = 1", [req.params.id], () => {
+      res.json({ success: true });
+    });
+  });
+});
+
+app.post('/api/pedido/:id/concluir-colab', isColab, (req, res) => {
+  db.run("UPDATE pedidos SET colab_concluido = 1 WHERE id = ? AND colaborador_id = ?", [req.params.id, req.session.colabId], function(err) {
+    if (err) return res.status(500).json({ error: 'Erro ao concluir.' });
+    db.run("UPDATE pedidos SET status = 'concluido' WHERE id = ? AND user_concluido = 1 AND colab_concluido = 1", [req.params.id], () => {
+      res.json({ success: true });
+    });
   });
 });
 

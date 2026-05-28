@@ -2,11 +2,13 @@ require('dotenv').config();
 const express = require("express");
 const path = require("path");
 const fs = require('fs');
+const crypto = require('crypto');
 const session = require('express-session');
 const sqlite3 = require("sqlite3").verbose();
 const { GoogleGenerativeAI } = require('@google/generative-ai');
 const bcrypt = require('bcryptjs');
 const https = require('https');
+const nodemailer = require('nodemailer');
 const authRoutes = require('./routes/auth');
 
 const app = express();
@@ -149,6 +151,17 @@ db.run(`ALTER TABLE colaboradores ADD COLUMN approved INTEGER DEFAULT 0`, () => 
 db.run(`ALTER TABLE colaboradores ADD COLUMN rating REAL DEFAULT 0`, () => {});
 db.run(`ALTER TABLE colaboradores ADD COLUMN working_hours TEXT`, () => {});
 db.run(`ALTER TABLE colaboradores ADD COLUMN banner TEXT DEFAULT NULL`, () => {});
+
+db.run(`
+  CREATE TABLE IF NOT EXISTS password_resets (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    email TEXT NOT NULL,
+    token TEXT NOT NULL UNIQUE,
+    expires_at DATETIME NOT NULL,
+    used INTEGER DEFAULT 0,
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+  )
+`);
 
 db.run(`
   CREATE TABLE IF NOT EXISTS servicos (
@@ -965,6 +978,137 @@ app.get('/api/enderecos', (req, res) => {
     res.json(addresses);
   });
 });
+
+// === EMAIL TRANSPORTER ===
+const transporter = nodemailer.createTransport({
+  service: 'gmail',
+  auth: {
+    user: 'fixoosite@gmail.com',
+    pass: 'AmigosFixoo12'
+  }
+});
+
+// === ESQUECI SENHA ===
+app.get('/esqueci-senha', (req, res) => {
+  res.render('esqueci-senha', { error: null, success: null, email: '' });
+});
+
+app.post('/esqueci-senha', (req, res) => {
+  const { email } = req.body;
+  if (!email) return res.render('esqueci-senha', { error: 'Digite seu email.', success: null, email: '' });
+
+  // Check if email exists in usuarios OR colaboradores
+  db.get("SELECT id FROM usuarios WHERE email = ?", [email], (err, user) => {
+    db.get("SELECT id FROM colaboradores WHERE email = ?", [email], (err, colab) => {
+      if (!user && !colab) {
+        return res.render('esqueci-senha', { error: 'Email não encontrado.', success: null, email });
+      }
+
+      const token = crypto.randomBytes(32).toString('hex');
+      const expiresAt = new Date(Date.now() + 60 * 60 * 1000).toISOString(); // 1 hour
+
+      db.run("INSERT INTO password_resets (email, token, expires_at) VALUES (?, ?, ?)", [email, token, expiresAt], (err) => {
+        if (err) {
+          console.error(err);
+          return res.render('esqueci-senha', { error: 'Erro ao gerar link. Tente novamente.', success: null, email });
+        }
+
+        const resetLink = `http://localhost:${port}/resetar-senha/${token}`;
+
+        const mailOptions = {
+          from: 'fixoosite@gmail.com',
+          to: email,
+          subject: 'Recuperação de Senha - Fixoo',
+          html: `
+            <div style="font-family:Arial,sans-serif;max-width:480px;margin:0 auto">
+              <h2 style="color:#3b82f6">Fixoo - Recuperação de Senha</h2>
+              <p>Você solicitou a redefinição de sua senha.</p>
+              <p>Clique no botão abaixo para criar uma nova senha:</p>
+              <a href="${resetLink}" style="display:inline-block;padding:12px 24px;background:#3b82f6;color:#fff;text-decoration:none;border-radius:8px;font-weight:600;margin:16px 0">Redefinir Senha</a>
+              <p style="color:#6b7280;font-size:13px">Este link expira em 1 hora.</p>
+              <p style="color:#6b7280;font-size:13px">Se você não solicitou esta recuperação, ignore este email.</p>
+              <hr style="border:none;border-top:1px solid #e5e7eb;margin:20px 0">
+              <p style="color:#9ca3af;font-size:12px">Fixoo - Sua plataforma de serviços</p>
+            </div>
+          `
+        };
+
+        transporter.sendMail(mailOptions, (err) => {
+          if (err) {
+            console.error('Erro ao enviar email:', err);
+            return res.render('esqueci-senha', { error: 'Erro ao enviar email. Tente novamente mais tarde.', success: null, email });
+          }
+          res.render('esqueci-senha', { error: null, success: 'Link de recuperação enviado para seu email!', email: '' });
+        });
+      });
+    });
+  });
+});
+
+// === RESETAR SENHA ===
+app.get('/resetar-senha/:token', (req, res) => {
+  const { token } = req.params;
+
+  db.get("SELECT * FROM password_resets WHERE token = ? AND used = 0 AND expires_at > datetime('now')", [token], (err, row) => {
+    if (!row) {
+      return res.render('esqueci-senha', { error: 'Link inválido ou expirado. Solicite um novo.', success: null, email: '' });
+    }
+    res.render('resetar-senha', { error: null, token });
+  });
+});
+
+app.post('/resetar-senha/:token', (req, res) => {
+  const { token } = req.params;
+  const { password, confirmPassword } = req.body;
+
+  if (!password || !confirmPassword) {
+    return res.render('resetar-senha', { error: 'Preencha todos os campos.', token });
+  }
+  if (password !== confirmPassword) {
+    return res.render('resetar-senha', { error: 'As senhas não conferem.', token });
+  }
+  if (password.length < 6) {
+    return res.render('resetar-senha', { error: 'A senha deve ter no mínimo 6 caracteres.', token });
+  }
+
+  db.get("SELECT * FROM password_resets WHERE token = ? AND used = 0 AND expires_at > datetime('now')", [token], (err, row) => {
+    if (!row) {
+      return res.render('esqueci-senha', { error: 'Link inválido ou expirado. Solicite um novo.', success: null, email: '' });
+    }
+
+    bcrypt.hash(password, 12, (err, hash) => {
+      if (err) {
+        return res.render('resetar-senha', { error: 'Erro ao processar senha.', token });
+      }
+
+      // Try updating in usuarios first, then colaboradores
+      db.run("UPDATE usuarios SET password = ? WHERE email = ?", [hash, row.email], function(err) {
+            if (this.changes === 0) {
+              db.run("UPDATE colaboradores SET password = ? WHERE email = ?", [hash, row.email], function(err) {
+                if (this.changes === 0) {
+                  return res.render('resetar-senha', { error: 'Usuário não encontrado.', token });
+                }
+                markTokenUsed(token, row.email, res);
+              });
+            } else {
+              markTokenUsed(token, row.email, res);
+            }
+      });
+    });
+  });
+});
+
+function markTokenUsed(token, email, res) {
+  db.run("UPDATE password_resets SET used = 1 WHERE token = ?", [token], (err) => {
+    db.get("SELECT id FROM colaboradores WHERE email = ?", [email], (err, colab) => {
+      if (colab) {
+        res.redirect('/colaborador/login?reset=ok');
+      } else {
+        res.redirect('/login?reset=ok');
+      }
+    });
+  });
+}
 
 app.use(express.static(path.join(__dirname, "public")));
 

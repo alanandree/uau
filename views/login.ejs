@@ -27,6 +27,9 @@
         <% if (error) { %>
           <div class="alert alert-error"><%= error %></div>
         <% } %>
+        <% if (req.query.reset === 'ok') { %>
+          <div class="alert alert-success">Senha redefinida com sucesso! Faça login com sua nova senha.</div>
+        <% } %>
 
         <form action="/login" method="POST">
           <div class="form-group">
@@ -43,6 +46,7 @@
             </div>
           </div>
           <button type="submit" class="btn btn-primary">Entrar</button>
+          <p style="text-align:center;margin-top:12px"><a href="/esqueci-senha" style="color:#3b82f6;font-size:13px;text-decoration:none">Esqueceu sua senha?</a></p>
         </form>
 
         <p class="link">Não tem conta? <a href="/register">Cadastre-se</a></p>

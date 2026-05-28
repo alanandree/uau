@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Redefinir Senha - Fixoo</title>
+  <link rel="stylesheet" href="/css/auth.css">
+  <link rel="stylesheet" href="/css/responsive.css">
+</head>
+<body>
+  <div class="split-container">
+    <div class="left-side">
+      <div class="form-wrapper">
+        <h1>Redefinir Senha</h1>
+
+        <% if (error) { %>
+          <div class="alert alert-error"><%= error %></div>
+        <% } %>
+
+        <form action="/resetar-senha/<%= token %>" method="POST">
+          <div class="form-group">
+            <label for="password">Nova senha</label>
+            <div style="position:relative">
+              <input type="password" name="password" id="password" minlength="6" required style="padding-right:40px">
+              <span onclick="toggleSenha(this)" data-showing="false" style="position:absolute;right:10px;top:50%;transform:translateY(-50%);cursor:pointer;user-select:none;display:flex;padding:4px;color:#9ca3af">
+                <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+              </span>
+            </div>
+            <small>Mínimo de 6 caracteres</small>
+          </div>
+          <div class="form-group">
+            <label for="confirmPassword">Confirmar nova senha</label>
+            <div style="position:relative">
+              <input type="password" name="confirmPassword" id="confirmPassword" minlength="6" required style="padding-right:40px">
+              <span onclick="toggleSenha(this)" data-showing="false" style="position:absolute;right:10px;top:50%;transform:translateY(-50%);cursor:pointer;user-select:none;display:flex;padding:4px;color:#9ca3af">
+                <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+              </span>
+            </div>
+          </div>
+          <button type="submit" class="btn btn-primary">Redefinir senha</button>
+        </form>
+
+        <p class="link"><a href="/login">Voltar ao login</a></p>
+      </div>
+    </div>
+    <div class="right-side">
+      <a href="/" style="text-decoration:none">
+        <div class="brand-name">
+          <span>F</span><span>I</span><span>X</span><span class="wave">O</span><span class="wave">O</span>
+        </div>
+      </a>
+    </div>
+  </div>
+
+  <script>
+    function toggleSenha(el) {
+      var input = el.previousElementSibling;
+      var showing = el.getAttribute('data-showing') === 'true';
+      el.innerHTML = showing
+        ? '<svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>'
+        : '<svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94"/><path d="M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19"/><line x1="1" y1="1" x2="23" y2="23"/></svg>';
+      input.type = showing ? 'password' : 'text';
+      el.setAttribute('data-showing', showing ? 'false' : 'true');
+    }
+  </script>
+</body>
+</html>
